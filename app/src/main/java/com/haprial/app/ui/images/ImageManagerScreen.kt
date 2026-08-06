@@ -31,7 +31,7 @@ fun ImageManagerScreen(vm: ImageManagerViewModel = koinViewModel()) {
         }
     ) { padding ->
         if (state.isLoading) Box(Modifier.fillMaxSize().padding(padding), Alignment.Center) { CircularProgressIndicator() }
-        else LazyVerticalGrid(GridCells.Adaptive(100.dp), Modifier.padding(padding), PaddingValues(8.dp), Arrangement.spacedBy(8.dp), Arrangement.spacedBy(8.dp)) {
+        else LazyVerticalGrid(columns = GridCells.Adaptive(100.dp), modifier = Modifier.padding(padding), contentPadding = PaddingValues(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(state.folders) { f ->
                 Card(Modifier.clickable { vm.enterFolder(f) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                     Column(Modifier.padding(16.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {

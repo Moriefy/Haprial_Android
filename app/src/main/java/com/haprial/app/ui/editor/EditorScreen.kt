@@ -53,7 +53,7 @@ fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinV
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 16.dp)) }
             HorizontalDivider()
             if (showPreview) {
-                AndroidView({ TextView(it).apply { textSize = 16f; setPadding(48, 32, 48, 32) } }, update = { markwon.setMarkdown(it, state.content) }, Modifier.fillMaxSize().verticalScroll(rememberScrollState()))
+                AndroidView(factory = { TextView(it).apply { textSize = 16f; setPadding(48, 32, 48, 32) } }, update = { markwon.setMarkdown(it, state.content) }, modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()))
             } else {
                 Column(Modifier.fillMaxSize()) {
                     MarkdownToolbar { p, s -> vm.updateContent(state.content + p + s) }

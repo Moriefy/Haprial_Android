@@ -27,7 +27,7 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
         when {
             state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
             state.error != null -> Box(Modifier.fillMaxSize(), Alignment.Center) { Text(state.error!!) }
-            else -> LazyColumn(Modifier.padding(padding), PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            else -> LazyColumn(modifier = Modifier.padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(state.articles, key = { it.id }) { a ->
                     Card(Modifier.fillMaxWidth().animateContentSize().clickable { onArticleClick(a.id) }) {
                         Column(Modifier.padding(16.dp)) {
