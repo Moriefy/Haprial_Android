@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.haprial.app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.haprial.app"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
     }
@@ -87,5 +87,5 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // Core
-    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.core:core-ktx:1.13.1")
 }
