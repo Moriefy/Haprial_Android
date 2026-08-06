@@ -54,3 +54,9 @@ data class CommentPostRequest(
     val depth: Int = 0, val nickname: String, val email: String = "",
     val website: String = "", val content: String
 )
+
+data class TrashItem(
+    val id: Int, val title: String, val slug: String,
+    @SerializedName("deleted_at") val deletedAt: String
+)
+data class TrashListResponse(val items: List<TrashItem>)

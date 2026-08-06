@@ -44,6 +44,9 @@ interface HaprialApi {
     @POST("/api/admin/comments/{id}/pin")
     suspend fun pinComment(@Path("id") id: Int): Response<PinResponse>
 
+    @POST("/api/admin/comments/{id}/like")
+    suspend fun likeComment(@Path("id") id: Int): Response<GenericResponse>
+
     @GET("/api/admin/images/list")
     suspend fun getImages(@Query("folder") folder: String? = null): Response<ImageListResponse>
 
@@ -61,4 +64,16 @@ interface HaprialApi {
 
     @GET("/api/admin/stats")
     suspend fun getStats(): Response<StatsResponse>
+
+    @GET("/api/admin/trash")
+    suspend fun getTrash(): Response<TrashListResponse>
+
+    @POST("/api/admin/trash/{id}/restore")
+    suspend fun restoreTrash(@Path("id") id: Int): Response<GenericResponse>
+
+    @DELETE("/api/admin/trash/{id}")
+    suspend fun deleteTrash(@Path("id") id: Int): Response<GenericResponse>
+
+    @POST("/api/admin/trash/empty")
+    suspend fun emptyTrash(): Response<GenericResponse>
 }

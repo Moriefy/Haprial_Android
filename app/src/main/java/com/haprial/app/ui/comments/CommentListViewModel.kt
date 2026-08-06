@@ -4,31 +4,105 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.haprial.app.data.api.HaprialApi
 import com.haprial.app.data.model.Comment
+import com.haprial.app.data.model.CommentPostRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-data class CommentState(val comments: List<Comment> = emptyList(), val pages: List<String> = emptyList(), val selectedPage: String = "", val isLoading: Boolean = true)
+data class CommentState(
+    val comments: List<Comment> = emptyList(),
+    val pages: List<String> = emptyList(),
+    val selectedPage: String = "",
+    val isLoading: Boolean = true,
+    val slugTitleMap: Map<String, String> = emptyMap(),
+    val replyingTo: Comment? = null,
+    val replyContent: String = "",
+    val replyNickname: String = ""
+)
 
 class CommentListViewModel(private val api: HaprialApi) : ViewModel() {
     private val _state = MutableStateFlow(CommentState())
     val state: StateFlow<CommentState> = _state
-    init { loadPages() }
+
+    init { loadPages(); loadArticleTitles() }
+
+    private fun loadArticleTitles() {
+        viewModelScope.launch {
+            try {
+                val articles = api.getArticles().body()?.articles ?: emptyList()
+                val map = articles.associate { "/posts/${it.slug}/" to it.title }
+                _state.value = _state.value.copy(slugTitleMap = map)
+            } catch (_: Exception) {}
+        }
+    }
+
     private fun loadPages() {
         viewModelScope.launch {
             try {
                 val resp = api.getComments(limit = 1)
-                if (resp.isSuccessful) { _state.value = _state.value.copy(pages = resp.body()?.pages ?: emptyList()); if (_state.value.pages.isNotEmpty()) loadComments(_state.value.pages[0]) }
+                if (resp.isSuccessful) {
+                    _state.value = _state.value.copy(pages = resp.body()?.pages ?: emptyList())
+                    if (_state.value.pages.isNotEmpty()) loadComments(_state.value.pages[0])
+                }
             } catch (_: Exception) {}
         }
     }
+
     fun loadComments(page: String) {
         viewModelScope.launch {
             _state.value = _state.value.copy(selectedPage = page, isLoading = true)
-            try { val r = api.getComments(pageSlug = page); if (r.isSuccessful) _state.value = _state.value.copy(r.body()?.comments ?: emptyList(), isLoading = false) }
-            catch (_: Exception) { _state.value = _state.value.copy(isLoading = false) }
+            try {
+                val r = api.getComments(pageSlug = page)
+                if (r.isSuccessful) _state.value = _state.value.copy(comments = r.body()?.comments ?: emptyList(), isLoading = false)
+            } catch (_: Exception) { _state.value = _state.value.copy(isLoading = false) }
         }
     }
-    fun deleteComment(id: Int) { viewModelScope.launch { try { api.deleteComment(id); loadComments(_state.value.selectedPage) } catch (_: Exception) {} } }
-    fun pinComment(id: Int) { viewModelScope.launch { try { api.pinComment(id); loadComments(_state.value.selectedPage) } catch (_: Exception) {} } }
+
+    fun deleteComment(id: Int) {
+        viewModelScope.launch { try { api.deleteComment(id); loadComments(_state.value.selectedPage) } catch (_: Exception) {} }
+    }
+
+    fun pinComment(id: Int) {
+        viewModelScope.launch { try { api.pinComment(id); loadComments(_state.value.selectedPage) } catch (_: Exception) {} }
+    }
+
+    fun likeComment(id: Int) {
+        viewModelScope.launch { try { api.likeComment(id); loadComments(_state.value.selectedPage) } catch (_: Exception) {} }
+    }
+
+    fun startReply(comment: Comment) {
+        _state.value = _state.value.copy(replyingTo = comment, replyContent = "", replyNickname = "")
+    }
+
+    fun cancelReply() {
+        _state.value = _state.value.copy(replyingTo = null, replyContent = "", replyNickname = "")
+    }
+
+    fun updateReplyContent(v: String) { _state.value = _state.value.copy(replyContent = v) }
+    fun updateReplyNickname(v: String) { _state.value = _state.value.copy(replyNickname = v) }
+
+    fun submitReply() {
+        val s = _state.value
+        val parent = s.replyingTo ?: return
+        if (s.replyContent.isBlank() || s.replyNickname.isBlank()) return
+        viewModelScope.launch {
+            try {
+                val page = s.selectedPage
+                val request = CommentPostRequest(
+                    page = page,
+                    parentId = parent.id,
+                    depth = parent.depth + 1,
+                    nickname = s.replyNickname,
+                    content = s.replyContent
+                )
+                api.postComment(request)
+                _state.value = _state.value.copy(replyingTo = null, replyContent = "", replyNickname = "")
+                loadComments(s.selectedPage)
+            } catch (_: Exception) {}
+        }
+    }
+
+    fun getPageTitle(page: String): String {
+        return _state.value.slugTitleMap[page] ?: page.removePrefix("/posts/").removeSuffix("/")
+    }
 }

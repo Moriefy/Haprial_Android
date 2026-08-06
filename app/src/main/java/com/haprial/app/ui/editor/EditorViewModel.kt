@@ -24,6 +24,9 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
     private var articleId = 0
     private var autoSaveJob: Job? = null
 
+    // For toolbar markdown insertion
+    var pendingInsertion: Pair<String, String>? = null
+
     fun loadArticle(id: Int) {
         articleId = id
         if (id == 0) { _state.value = EditorState(isNew = true, date = today()); startAutoSave(); return }
@@ -40,6 +43,12 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
     fun updateTags(v: String) { _state.value = _state.value.copy(tags = v) }
     fun updateCategory(v: String) { _state.value = _state.value.copy(category = v) }
     fun updateExcerpt(v: String) { _state.value = _state.value.copy(excerpt = v) }
+
+    fun insertMarkdown(prefix: String, suffix: String) {
+        pendingInsertion = prefix to suffix
+        // Trigger recomposition
+        _state.value = _state.value.copy()
+    }
 
     fun save(status: String = "draft") {
         val s = _state.value

@@ -7,6 +7,7 @@ import com.haprial.app.ui.editor.EditorViewModel
 import com.haprial.app.ui.comments.CommentListViewModel
 import com.haprial.app.ui.images.ImageManagerViewModel
 import com.haprial.app.ui.settings.SettingsViewModel
+import com.haprial.app.ui.trash.TrashViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -21,4 +22,5 @@ val appModule = module {
     viewModel { CommentListViewModel(get()) }
     viewModel { ImageManagerViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
+    viewModel { TrashViewModel(get()) }
 }

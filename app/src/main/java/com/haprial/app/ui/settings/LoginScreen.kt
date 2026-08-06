@@ -19,7 +19,34 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
+    var checkingToken by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
+    val prefs = remember { ctx.getSharedPreferences("haprial_auth", 0) }
+
+    // Check saved token on init
+    LaunchedEffect(Unit) {
+        val savedToken = prefs.getString("token", null)
+        if (!savedToken.isNullOrBlank()) {
+            try {
+                val api = ApiClient.create(ctx)
+                val resp = api.verify()
+                if (resp.isSuccessful && resp.body()?.ok == true) {
+                    onLoginSuccess()
+                    return@LaunchedEffect
+                }
+            } catch (_: Exception) {}
+            // Token invalid, clear it
+            prefs.edit().remove("token").apply()
+        }
+        checkingToken = false
+    }
+
+    if (checkingToken) {
+        Box(Modifier.fillMaxSize(), Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
 
     Surface(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().padding(32.dp), Arrangement.Center, Alignment.CenterHorizontally) {
