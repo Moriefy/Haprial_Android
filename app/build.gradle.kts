@@ -94,3 +94,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
 }
 
+configurations.configureEach {
+    exclude(group = "org.jetbrains", module = "annotations-java5")
+}
+
