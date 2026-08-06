@@ -67,13 +67,13 @@ fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinV
                                     setPadding(48, 32, 48, 32)
                                 }
                                 addView(tv)
-                                markwon.set(tv, state.content)
+                                markwon.setMarkdown(tv, state.content)
                                 tag = tv
                             }
                         },
                         update = { scrollView ->
                             val tv = scrollView.tag as android.widget.TextView
-                            markwon.set(tv, state.content)
+                            markwon.setMarkdown(tv, state.content)
                         },
                         modifier = Modifier.fillMaxSize()
                     )

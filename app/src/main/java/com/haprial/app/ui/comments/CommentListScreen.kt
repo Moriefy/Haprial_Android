@@ -15,7 +15,21 @@ import androidx.compose.ui.unit.dp
 import com.haprial.app.data.model.Comment
 import org.koin.androidx.compose.koinViewModel
 
-fun stripHtml(html: String): String = html.replace(Regex("<[^>]*>"), "")
+fun stripHtml(html: String): String = html.replace(Regex("<[^>]*>"), "").trim()
+
+// 树节点：评论 + 子评论
+data class CommentNode(val comment: Comment, val children: List<CommentNode>)
+
+// 将平铺评论构建为树
+fun buildCommentTree(comments: List<Comment>): List<CommentNode> {
+    val byParent = comments.groupBy { it.parentId }
+    fun buildChildren(parentId: Int): List<CommentNode> {
+        return (byParent[parentId] ?: emptyList()).map { child ->
+            CommentNode(child, buildChildren(child.id))
+        }
+    }
+    return buildChildren(0)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +67,7 @@ fun CommentListScreen(vm: CommentListViewModel = koinViewModel()) {
 
     Scaffold(topBar = { TopAppBar(title = { Text("评论") }) }) { padding ->
         Row(Modifier.padding(padding).fillMaxSize()) {
-            // Left sidebar: show article titles, not slugs
+            // 左栏：文章标题
             LazyColumn(Modifier.weight(0.35f)) {
                 items(state.pages, key = { it }) { page ->
                     val title = vm.getPageTitle(page)
@@ -65,35 +79,98 @@ fun CommentListScreen(vm: CommentListViewModel = koinViewModel()) {
                 }
             }
             VerticalDivider()
+            // 右栏：评论树
             if (state.isLoading) Box(Modifier.weight(0.65f), Alignment.Center) { CircularProgressIndicator() }
-            else LazyColumn(Modifier.weight(0.65f), contentPadding = PaddingValues(8.dp)) {
-                items(state.comments, key = { it.id }) { c ->
-                    Card(Modifier.fillMaxWidth().padding(4.dp)) {
-                        Column(Modifier.padding(12.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(c.nickname, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-                                if (c.isAdmin == 1) SuggestionChip(onClick = {}, label = { Text("博主") })
-                                if (c.pinned == 1) SuggestionChip(onClick = {}, label = { Text("置顶") })
-                            }
-                            Spacer(Modifier.height(4.dp))
-                            Text(stripHtml(c.contentHtml), style = MaterialTheme.typography.bodyMedium, maxLines = 5, overflow = TextOverflow.Ellipsis)
-                            Spacer(Modifier.height(8.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(c.createdAt, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    IconButton({ vm.likeComment(c.id) }, Modifier.size(32.dp)) {
-                                        Icon(Icons.Default.Favorite, "点赞", Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
-                                    }
-                                    Text("${c.liked}", style = MaterialTheme.typography.bodySmall)
-                                }
-                                IconButton({ vm.startReply(c) }, Modifier.size(32.dp)) {
-                                    Icon(Icons.Default.Reply, "回复", Modifier.size(16.dp))
-                                }
-                                IconButton({ vm.pinComment(c.id) }, Modifier.size(32.dp)) { Icon(Icons.Default.PushPin, null, Modifier.size(16.dp)) }
-                                IconButton({ vm.deleteComment(c.id) }, Modifier.size(32.dp)) { Icon(Icons.Default.Delete, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error) }
-                            }
-                        }
+            else if (state.comments.isEmpty()) Box(Modifier.weight(0.65f), Alignment.Center) { Text("暂无评论", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            else {
+                val tree = remember(state.comments) { buildCommentTree(state.comments) }
+                LazyColumn(Modifier.weight(0.65f), contentPadding = PaddingValues(8.dp)) {
+                    tree.forEach { node ->
+                        renderCommentNode(node, depth = 0, vm = vm)
                     }
+                }
+            }
+        }
+    }
+}
+
+// 递归渲染评论树节点
+fun androidx.compose.foundation.lazy.LazyListScope.renderCommentNode(
+    node: CommentNode,
+    depth: Int,
+    vm: CommentListViewModel
+) {
+    item(key = node.comment.id) {
+        CommentItem(
+            comment = node.comment,
+            depth = depth,
+            onLike = { vm.likeComment(node.comment.id) },
+            onReply = { vm.startReply(node.comment) },
+            onPin = { vm.pinComment(node.comment.id) },
+            onDelete = { vm.deleteComment(node.comment.id) }
+        )
+    }
+    // 递归渲染子评论
+    node.children.forEach { child ->
+        renderCommentNode(child, depth + 1, vm)
+    }
+}
+
+@Composable
+fun CommentItem(
+    comment: Comment,
+    depth: Int,
+    onLike: () -> Unit,
+    onReply: () -> Unit,
+    onPin: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val indent = (depth * 16).dp
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = indent, top = 2.dp, bottom = 2.dp, end = 4.dp)
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            // 昵称 + 标签
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(comment.nickname, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                if (comment.isAdmin == 1) {
+                    SuggestionChip(onClick = {}, label = { Text("博主") }, modifier = Modifier.height(24.dp))
+                    Spacer(Modifier.width(4.dp))
+                }
+                if (comment.pinned == 1) {
+                    SuggestionChip(onClick = {}, label = { Text("置顶") }, modifier = Modifier.height(24.dp))
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            // 内容（去除 HTML）
+            Text(stripHtml(comment.contentHtml), style = MaterialTheme.typography.bodyMedium, maxLines = 10, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.height(8.dp))
+            // 操作栏
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(comment.createdAt, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
+                // 点赞
+                IconButton(onClick = onLike, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Favorite, "点赞", Modifier.size(16.dp), tint = if (comment.liked > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (comment.liked > 0) {
+                    Text("${comment.liked}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                }
+                // 回复（最多2层）
+                if (depth < 2) {
+                    IconButton(onClick = onReply, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Reply, "回复", Modifier.size(16.dp))
+                    }
+                }
+                // 置顶
+                IconButton(onClick = onPin, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.PushPin, "置顶", Modifier.size(16.dp))
+                }
+                // 删除
+                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Delete, "删除", Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
                 }
             }
         }

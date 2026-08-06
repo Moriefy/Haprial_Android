@@ -56,7 +56,7 @@ data class CommentPostRequest(
 )
 
 data class TrashItem(
-    val id: Int, val title: String, val slug: String,
+    val id: Int, val title: String, val slug: String, val type: String = "article",
     @SerializedName("deleted_at") val deletedAt: String
 )
-data class TrashListResponse(val items: List<TrashItem>)
+data class TrashListResponse(@SerializedName("trash") val items: List<TrashItem>)
