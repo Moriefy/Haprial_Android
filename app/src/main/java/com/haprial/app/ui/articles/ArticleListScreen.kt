@@ -34,20 +34,7 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
     val listState = rememberLazyListState()
 
     // Hero collapse: track scroll direction
-    var previousScrollIndex by remember { mutableIntStateOf(0) }
-    var previousScrollOffset by remember { mutableIntStateOf(0) }
-    val isScrollingDown by remember {
-        derivedStateOf {
-            val currentIndex = listState.firstVisibleItemIndex
-            val currentOffset = listState.firstVisibleItemScrollOffset
-            val scrollingDown = currentIndex > previousScrollIndex ||
-                (currentIndex == previousScrollIndex && currentOffset > previousScrollIndex + 50)
-            previousScrollIndex = currentIndex
-            previousScrollOffset = currentOffset
-            scrollingDown
-        }
     }
-    val showHero by remember { derivedStateOf { !isScrollingDown || listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 10 } }
 
     // Filter articles
     val filteredArticles = remember(state.articles, searchQuery, statusFilter, categoryFilter, yearFilter, tagFilter) {
@@ -144,79 +131,45 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
         floatingActionButton = { ExtendedFloatingActionButton(onClick = onNewArticle, icon = { Icon(Icons.Default.Edit, null) }, text = { Text("写文章") }) }
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
-            // Search bar - full width
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("搜索文章...") },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Search, null) },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Default.Clear, "清除") }
-                }
-            )
-
-            // Filter button row
+            // 筛选栏 - 紧凑布局
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Active filter chips
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    if (statusFilter != "all") {
-                        AssistChip(onClick = { statusFilter = "all" }, label = { Text(when(statusFilter){"published"->"已发布";"draft"->"草稿";else->statusFilter}, style = MaterialTheme.typography.labelSmall) }, trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(14.dp)) })
-                    }
-                    if (categoryFilter.isNotBlank()) {
-                        AssistChip(onClick = { categoryFilter = "" }, label = { Text(categoryFilter, style = MaterialTheme.typography.labelSmall) }, trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(14.dp)) })
-                    }
-                    if (yearFilter.isNotBlank()) {
-                        AssistChip(onClick = { yearFilter = "" }, label = { Text(yearFilter, style = MaterialTheme.typography.labelSmall) }, trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(14.dp)) })
-                    }
-                    if (tagFilter.isNotBlank()) {
-                        AssistChip(onClick = { tagFilter = "" }, label = { Text(tagFilter, style = MaterialTheme.typography.labelSmall) }, trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(14.dp)) })
-                    }
-                }
-                // Filter button
-                FilledTonalButton(onClick = { showFilterSheet = true }) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("搜索…", style = MaterialTheme.typography.bodySmall) },
+                    modifier = Modifier.weight(1f).height(44.dp),
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    leadingIcon = { Icon(Icons.Default.Search, null, Modifier.size(18.dp)) },
+                    trailingIcon = { if (searchQuery.isNotEmpty()) IconButton(onClick = { searchQuery = "" }, Modifier.size(18.dp)) { Icon(Icons.Default.Clear, "清除", Modifier.size(14.dp)) } }
+                )
+                FilledTonalButton(onClick = { showFilterSheet = true }, modifier = Modifier.height(44.dp), contentPadding = PaddingValues(horizontal = 12.dp)) {
                     Icon(Icons.Default.FilterList, null, Modifier.size(18.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("筛选")
+                    if (statusFilter != "all" || categoryFilter.isNotBlank() || yearFilter.isNotBlank() || tagFilter.isNotBlank()) {
+                        Spacer(Modifier.width(4.dp)); Text("筛选中", style = MaterialTheme.typography.labelSmall)
+                    }
                 }
             }
-
-            Text(
-                "共 ${filteredArticles.size} 篇",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-            )
+            // 活跃筛选标签（紧凑）
+            if (statusFilter != "all" || categoryFilter.isNotBlank() || yearFilter.isNotBlank() || tagFilter.isNotBlank()) {
+                Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (statusFilter != "all") AssistChip(onClick = { statusFilter = "all" }, label = { Text(if(statusFilter=="published")"已发布"else"草稿", style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.height(28.dp), trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(12.dp)) })
+                    if (categoryFilter.isNotBlank()) AssistChip(onClick = { categoryFilter = "" }, label = { Text(categoryFilter, style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.height(28.dp), trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(12.dp)) })
+                    if (yearFilter.isNotBlank()) AssistChip(onClick = { yearFilter = "" }, label = { Text(yearFilter, style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.height(28.dp), trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(12.dp)) })
+                    if (tagFilter.isNotBlank()) AssistChip(onClick = { tagFilter = "" }, label = { Text(tagFilter, style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.height(28.dp), trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(12.dp)) })
+                }
+            }
 
             when {
                 state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
                 state.error != null -> Box(Modifier.fillMaxSize(), Alignment.Center) { Text(state.error!!) }
                 else -> {
                     LazyColumn(state = listState, modifier = Modifier.weight(1f), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        // Hero section - collapses on scroll down
-                        item(key = "hero") {
-                            AnimatedVisibility(
-                                visible = showHero,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Card(
-                                    Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                                ) {
-                                    Column(Modifier.padding(20.dp)) {
-                                        Text("Moriefyの半岛铁盒", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                                        Spacer(Modifier.height(4.dp))
-                                        Text("共 ${state.articles.size} 篇文章", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
-                                    }
-                                }
-                            }
-                        }
+                        // 无 Hero 区域，直接显示文章列表
 
                         items(pagedArticles, key = { it.id }) { a ->
                             Card(Modifier.fillMaxWidth().clickable { onArticleClick(a.id) }) {

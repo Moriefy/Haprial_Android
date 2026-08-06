@@ -43,6 +43,7 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
     fun updateTags(v: String) { _state.value = _state.value.copy(tags = v) }
     fun updateCategory(v: String) { _state.value = _state.value.copy(category = v) }
     fun updateExcerpt(v: String) { _state.value = _state.value.copy(excerpt = v) }
+    fun getContent(): String = _state.value.content
 
     fun insertMarkdown(prefix: String, suffix: String) {
         pendingInsertion = prefix to suffix
