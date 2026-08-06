@@ -1,25 +1,28 @@
 package com.haprial.app.ui.articles
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.haprial.app.data.model.Article
+import com.moriafly.salt.ui.*
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, UnstableSaltUiApi::class)
 @Composable
 fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, vm: ArticleListViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
@@ -32,9 +35,6 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
     var currentPage by remember { mutableIntStateOf(0) }
     val pageSize = 10
     val listState = rememberLazyListState()
-
-    // Hero collapse: track scroll direction
-    }
 
     // Filter articles
     val filteredArticles = remember(state.articles, searchQuery, statusFilter, categoryFilter, yearFilter, tagFilter) {
@@ -57,142 +57,191 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
     val years = remember(state.articles) { state.articles.map { it.date.take(4) }.distinct().sortedDescending() }
     val tags = remember(state.articles) { state.articles.flatMap { it.tagList() }.distinct().sorted() }
 
-    // Reset page on filter change
     LaunchedEffect(searchQuery, statusFilter, categoryFilter, yearFilter, tagFilter) { currentPage = 0 }
 
-    // Filter bottom sheet
+    // Filter bottom sheet - using Material3 ModalBottomSheet as SaltUI doesn't have an equivalent
     if (showFilterSheet) {
-        ModalBottomSheet(onDismissRequest = { showFilterSheet = false }) {
+        androidx.compose.material3.ModalBottomSheet(onDismissRequest = { showFilterSheet = false }) {
             Column(Modifier.padding(16.dp)) {
-                Text("筛选条件", style = MaterialTheme.typography.titleLarge)
+                Text("筛选条件", fontSize = 20.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                 Spacer(Modifier.height(16.dp))
 
-                // Status
-                Text("状态", style = MaterialTheme.typography.labelLarge)
+                Text("状态", color = SaltTheme.colors.subText, style = SaltTheme.textStyles.sub)
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf("all" to "全部", "published" to "已发布", "draft" to "草稿").forEach { (v, l) ->
-                        FilterChip(selected = statusFilter == v, onClick = { statusFilter = v }, label = { Text(l) })
+                        androidx.compose.material3.FilterChip(
+                            selected = statusFilter == v,
+                            onClick = { statusFilter = v },
+                            label = { Text(l) }
+                        )
                     }
                 }
                 Spacer(Modifier.height(16.dp))
 
-                // Category
                 if (categories.isNotEmpty()) {
-                    Text("分类", style = MaterialTheme.typography.labelLarge)
+                    Text("分类", color = SaltTheme.colors.subText, style = SaltTheme.textStyles.sub)
                     Spacer(Modifier.height(8.dp))
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        FilterChip(selected = categoryFilter.isBlank(), onClick = { categoryFilter = "" }, label = { Text("全部") })
+                        androidx.compose.material3.FilterChip(selected = categoryFilter.isBlank(), onClick = { categoryFilter = "" }, label = { Text("全部") })
                         categories.forEach { cat ->
-                            FilterChip(selected = categoryFilter == cat, onClick = { categoryFilter = cat }, label = { Text(cat) })
+                            androidx.compose.material3.FilterChip(selected = categoryFilter == cat, onClick = { categoryFilter = cat }, label = { Text(cat) })
                         }
                     }
                     Spacer(Modifier.height(16.dp))
                 }
 
-                // Year
                 if (years.isNotEmpty()) {
-                    Text("年份", style = MaterialTheme.typography.labelLarge)
+                    Text("年份", color = SaltTheme.colors.subText, style = SaltTheme.textStyles.sub)
                     Spacer(Modifier.height(8.dp))
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        FilterChip(selected = yearFilter.isBlank(), onClick = { yearFilter = "" }, label = { Text("全部") })
+                        androidx.compose.material3.FilterChip(selected = yearFilter.isBlank(), onClick = { yearFilter = "" }, label = { Text("全部") })
                         years.forEach { yr ->
-                            FilterChip(selected = yearFilter == yr, onClick = { yearFilter = yr }, label = { Text(yr) })
+                            androidx.compose.material3.FilterChip(selected = yearFilter == yr, onClick = { yearFilter = yr }, label = { Text(yr) })
                         }
                     }
                     Spacer(Modifier.height(16.dp))
                 }
 
-                // Tags
                 if (tags.isNotEmpty()) {
-                    Text("标签", style = MaterialTheme.typography.labelLarge)
+                    Text("标签", color = SaltTheme.colors.subText, style = SaltTheme.textStyles.sub)
                     Spacer(Modifier.height(8.dp))
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        FilterChip(selected = tagFilter.isBlank(), onClick = { tagFilter = "" }, label = { Text("全部") })
+                        androidx.compose.material3.FilterChip(selected = tagFilter.isBlank(), onClick = { tagFilter = "" }, label = { Text("全部") })
                         tags.forEach { t ->
-                            FilterChip(selected = tagFilter == t, onClick = { tagFilter = t }, label = { Text(t) })
+                            androidx.compose.material3.FilterChip(selected = tagFilter == t, onClick = { tagFilter = t }, label = { Text(t) })
                         }
                     }
                     Spacer(Modifier.height(16.dp))
                 }
 
-                // Reset button
-                TextButton(onClick = {
-                    statusFilter = "all"; categoryFilter = ""; yearFilter = ""; tagFilter = ""
-                }) { Text("重置筛选") }
+                Button(
+                    onClick = {
+                        statusFilter = "all"; categoryFilter = ""; yearFilter = ""; tagFilter = ""
+                    },
+                    appearance = ButtonAppearance.Subtle
+                ) { Text("重置筛选") }
 
                 Spacer(Modifier.height(32.dp))
             }
         }
     }
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("文章") }, actions = { IconButton(onClick = { vm.loadArticles() }) { Icon(Icons.Default.Refresh, "刷新") } }) },
-        floatingActionButton = { ExtendedFloatingActionButton(onClick = onNewArticle, icon = { Icon(Icons.Default.Edit, null) }, text = { Text("写文章") }) }
-    ) { padding ->
-        Column(Modifier.padding(padding).fillMaxSize()) {
-            // 筛选栏 - 紧凑布局
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(SaltTheme.colors.background)
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            // Title bar
+            TitleBar(
+                onBack = {},
+                text = "文章",
+                showBackBtn = false
+            )
+
+            // Search and filter bar
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
+                // Search using Material3 OutlinedTextField (SaltUI ItemEdit is not ideal for inline search)
+                androidx.compose.material3.OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("搜索…", style = MaterialTheme.typography.bodySmall) },
+                    placeholder = { Text("搜索…", style = SaltTheme.textStyles.sub) },
                     modifier = Modifier.weight(1f).height(44.dp),
                     singleLine = true,
-                    textStyle = MaterialTheme.typography.bodySmall,
-                    leadingIcon = { Icon(Icons.Default.Search, null, Modifier.size(18.dp)) },
-                    trailingIcon = { if (searchQuery.isNotEmpty()) IconButton(onClick = { searchQuery = "" }, Modifier.size(18.dp)) { Icon(Icons.Default.Clear, "清除", Modifier.size(14.dp)) } }
+                    textStyle = SaltTheme.textStyles.main.copy(fontSize = 14.sp),
+                    leadingIcon = { Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Search), contentDescription = null, modifier = Modifier.size(18.dp)) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            androidx.compose.material3.IconButton(onClick = { searchQuery = "" }, modifier = Modifier.size(18.dp)) {
+                                Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Clear), contentDescription = "清除", modifier = Modifier.size(14.dp))
+                            }
+                        }
+                    }
                 )
-                FilledTonalButton(onClick = { showFilterSheet = true }, modifier = Modifier.height(44.dp), contentPadding = PaddingValues(horizontal = 12.dp)) {
-                    Icon(Icons.Default.FilterList, null, Modifier.size(18.dp))
+                Button(
+                    onClick = { showFilterSheet = true },
+                    appearance = ButtonAppearance.Subtle
+                ) {
+                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.FilterList), contentDescription = null, modifier = Modifier.size(18.dp))
                     if (statusFilter != "all" || categoryFilter.isNotBlank() || yearFilter.isNotBlank() || tagFilter.isNotBlank()) {
-                        Spacer(Modifier.width(4.dp)); Text("筛选中", style = MaterialTheme.typography.labelSmall)
+                        Spacer(Modifier.width(4.dp))
+                        Text("筛选中", style = SaltTheme.textStyles.sub)
                     }
                 }
             }
-            // 活跃筛选标签（紧凑）
+
+            // Active filter tags
             if (statusFilter != "all" || categoryFilter.isNotBlank() || yearFilter.isNotBlank() || tagFilter.isNotBlank()) {
                 Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    if (statusFilter != "all") AssistChip(onClick = { statusFilter = "all" }, label = { Text(if(statusFilter=="published")"已发布"else"草稿", style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.height(28.dp), trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(12.dp)) })
-                    if (categoryFilter.isNotBlank()) AssistChip(onClick = { categoryFilter = "" }, label = { Text(categoryFilter, style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.height(28.dp), trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(12.dp)) })
-                    if (yearFilter.isNotBlank()) AssistChip(onClick = { yearFilter = "" }, label = { Text(yearFilter, style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.height(28.dp), trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(12.dp)) })
-                    if (tagFilter.isNotBlank()) AssistChip(onClick = { tagFilter = "" }, label = { Text(tagFilter, style = MaterialTheme.typography.labelSmall) }, modifier = Modifier.height(28.dp), trailingIcon = { Icon(Icons.Default.Close, null, Modifier.size(12.dp)) })
+                    if (statusFilter != "all") {
+                        androidx.compose.material3.AssistChip(
+                            onClick = { statusFilter = "all" },
+                            label = { Text(if(statusFilter=="published")"已发布"else"草稿", style = SaltTheme.textStyles.sub) }
+                        )
+                    }
+                    if (categoryFilter.isNotBlank()) {
+                        androidx.compose.material3.AssistChip(onClick = { categoryFilter = "" }, label = { Text(categoryFilter, style = SaltTheme.textStyles.sub) })
+                    }
+                    if (yearFilter.isNotBlank()) {
+                        androidx.compose.material3.AssistChip(onClick = { yearFilter = "" }, label = { Text(yearFilter, style = SaltTheme.textStyles.sub) })
+                    }
+                    if (tagFilter.isNotBlank()) {
+                        androidx.compose.material3.AssistChip(onClick = { tagFilter = "" }, label = { Text(tagFilter, style = SaltTheme.textStyles.sub) })
+                    }
                 }
             }
 
             when {
-                state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
-                state.error != null -> Box(Modifier.fillMaxSize(), Alignment.Center) { Text(state.error!!) }
+                state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+                state.error != null -> Box(Modifier.fillMaxSize(), Alignment.Center) { Text(state.error!!, color = SaltTheme.colors.error) }
                 else -> {
                     LazyColumn(state = listState, modifier = Modifier.weight(1f), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        // 无 Hero 区域，直接显示文章列表
-
                         items(pagedArticles, key = { it.id }) { a ->
-                            Card(Modifier.fillMaxWidth().clickable { onArticleClick(a.id) }) {
+                            RoundedColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onArticleClick(a.id) }
+                            ) {
                                 Column(Modifier.padding(16.dp)) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Column(Modifier.weight(1f)) {
-                                            Text(a.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                                            Text("${a.date} · ${a.category}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(a.title, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                            Text("${a.date} · ${a.category}", style = SaltTheme.textStyles.sub, color = SaltTheme.colors.subText)
                                         }
                                         var menu by remember { mutableStateOf(false) }
                                         Box {
-                                            IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, null) }
-                                            DropdownMenu(menu, { menu = false }) {
-                                                DropdownMenuItem({ Text(if (a.status == "published") "下架" else "发布") }, { menu = false; vm.togglePublish(a.id) }, leadingIcon = { Icon(Icons.Default.Publish, null) })
-                                                DropdownMenuItem({ Text("删除", color = MaterialTheme.colorScheme.error) }, { menu = false; vm.deleteArticle(a.id) }, leadingIcon = { Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error) })
+                                            androidx.compose.material3.IconButton(onClick = { menu = true }) {
+                                                Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.MoreVert), contentDescription = null)
+                                            }
+                                            androidx.compose.material3.DropdownMenu(menu, { menu = false }) {
+                                                androidx.compose.material3.DropdownMenuItem(
+                                                    { Text(if (a.status == "published") "下架" else "发布") },
+                                                    { menu = false; vm.togglePublish(a.id) },
+                                                    leadingIcon = { Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Publish), contentDescription = null) }
+                                                )
+                                                androidx.compose.material3.DropdownMenuItem(
+                                                    { Text("删除", color = SaltTheme.colors.error) },
+                                                    { menu = false; vm.deleteArticle(a.id) },
+                                                    leadingIcon = { Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Delete), contentDescription = null, tint = SaltTheme.colors.error) }
+                                                )
                                             }
                                         }
                                     }
-                                    if (a.excerpt.isNotEmpty()) { Spacer(Modifier.height(8.dp)); Text(a.excerpt, style = MaterialTheme.typography.bodyMedium, maxLines = 2, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                                    if (a.excerpt.isNotEmpty()) {
+                                        Spacer(Modifier.height(8.dp))
+                                        Text(a.excerpt, style = SaltTheme.textStyles.sub, maxLines = 2, color = SaltTheme.colors.subText)
+                                    }
                                     Spacer(Modifier.height(8.dp))
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        SuggestionChip(onClick = {}, label = { Text(if (a.status == "published") "已发布" else "草稿") })
-                                        if (a.pinned == 1) SuggestionChip(onClick = {}, label = { Text("📌 置顶") })
+                                        androidx.compose.material3.SuggestionChip(onClick = {}, label = { Text(if (a.status == "published") "已发布" else "草稿") })
+                                        if (a.pinned == 1) androidx.compose.material3.SuggestionChip(onClick = {}, label = { Text("📌 置顶") })
                                     }
                                 }
                             }
@@ -206,16 +255,16 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IconButton(onClick = { if (currentPage > 0) currentPage-- }, enabled = currentPage > 0) {
-                                Icon(Icons.Default.KeyboardArrowLeft, "上一页")
+                            androidx.compose.material3.IconButton(onClick = { if (currentPage > 0) currentPage-- }, enabled = currentPage > 0) {
+                                Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.KeyboardArrowLeft), contentDescription = "上一页")
                             }
                             Text(
                                 "${currentPage + 1} / $totalPages",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = SaltTheme.textStyles.main,
                                 modifier = Modifier.padding(horizontal = 16.dp)
                             )
-                            IconButton(onClick = { if (currentPage < totalPages - 1) currentPage++ }, enabled = currentPage < totalPages - 1) {
-                                Icon(Icons.Default.KeyboardArrowRight, "下一页")
+                            androidx.compose.material3.IconButton(onClick = { if (currentPage < totalPages - 1) currentPage++ }, enabled = currentPage < totalPages - 1) {
+                                Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.KeyboardArrowRight), contentDescription = "下一页")
                             }
                         }
                     }

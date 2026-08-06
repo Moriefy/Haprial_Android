@@ -2,10 +2,14 @@ package com.haprial.app.ui.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -21,6 +25,7 @@ import com.haprial.app.ui.images.ImageManagerScreen
 import com.haprial.app.ui.settings.SettingsScreen
 import com.haprial.app.ui.settings.LoginScreen
 import com.haprial.app.ui.trash.TrashScreen
+import com.moriafly.salt.ui.*
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     data object Articles : Screen("articles", "文章", Icons.Default.Article)
@@ -31,6 +36,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 }
 val bottomScreens = listOf(Screen.Articles, Screen.Comments, Screen.Images, Screen.Trash, Screen.Settings)
 
+@OptIn(UnstableSaltUiApi::class)
 @Composable
 fun HaprialNavGraph() {
     val navController = rememberNavController()
@@ -41,44 +47,53 @@ fun HaprialNavGraph() {
     if (!isLoggedIn) { LoginScreen(onLoginSuccess = { isLoggedIn = true }); return }
 
     val showBottomBar = currentRoute in bottomScreens.map { it.route }
-    Scaffold(
-        bottomBar = {
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(SaltTheme.colors.background)
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            // Main content area
+            Box(Modifier.weight(1f)) {
+                NavHost(
+                    navController, Screen.Articles.route,
+                    enterTransition = { fadeIn(animationSpec = tween(150)) },
+                    exitTransition = { fadeOut(animationSpec = tween(150)) },
+                    popEnterTransition = { fadeIn(animationSpec = tween(150)) },
+                    popExitTransition = { fadeOut(animationSpec = tween(150)) }
+                ) {
+                    composable(Screen.Articles.route) {
+                        ArticleListScreen(onArticleClick = { navController.navigate("editor/$it") }, onNewArticle = { navController.navigate("editor/0") })
+                    }
+                    composable("editor/{id}") {
+                        EditorScreen(it.arguments?.getString("id")?.toIntOrNull() ?: 0, onBack = { navController.popBackStack() })
+                    }
+                    composable(Screen.Comments.route) { CommentListScreen() }
+                    composable(Screen.Images.route) { ImageManagerScreen() }
+                    composable(Screen.Trash.route) { TrashScreen() }
+                    composable(Screen.Settings.route) { SettingsScreen(onLogout = { isLoggedIn = false }) }
+                }
+            }
+
+            // SaltUI Bottom Bar
             if (showBottomBar) {
-                NavigationBar {
+                BottomBar {
                     bottomScreens.forEach { screen ->
-                        NavigationBarItem(
-                            icon = { Icon(screen.icon, screen.title) },
-                            label = { Text(screen.title) },
-                            selected = currentRoute == screen.route,
+                        BottomBarItem(
+                            state = currentRoute == screen.route,
                             onClick = {
                                 navController.navigate(screen.route) {
                                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                     launchSingleTop = true; restoreState = true
                                 }
-                            }
+                            },
+                            painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(screen.icon),
+                            text = screen.title
                         )
                     }
                 }
             }
-        }
-    ) { padding ->
-        NavHost(
-            navController, Screen.Articles.route, Modifier.padding(padding),
-            enterTransition = { fadeIn(animationSpec = tween(150)) },
-            exitTransition = { fadeOut(animationSpec = tween(150)) },
-            popEnterTransition = { fadeIn(animationSpec = tween(150)) },
-            popExitTransition = { fadeOut(animationSpec = tween(150)) }
-        ) {
-            composable(Screen.Articles.route) {
-                ArticleListScreen(onArticleClick = { navController.navigate("editor/$it") }, onNewArticle = { navController.navigate("editor/0") })
-            }
-            composable("editor/{id}") {
-                EditorScreen(it.arguments?.getString("id")?.toIntOrNull() ?: 0, onBack = { navController.popBackStack() })
-            }
-            composable(Screen.Comments.route) { CommentListScreen() }
-            composable(Screen.Images.route) { ImageManagerScreen() }
-            composable(Screen.Trash.route) { TrashScreen() }
-            composable(Screen.Settings.route) { SettingsScreen(onLogout = { isLoggedIn = false }) }
         }
     }
 }
