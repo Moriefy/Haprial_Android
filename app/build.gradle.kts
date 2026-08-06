@@ -80,8 +80,12 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Koin (DI)
-    implementation("io.insert-koin:koin-android:3.5.6")
-    implementation("io.insert-koin:koin-androidx-compose:3.5.6")
+    implementation("io.insert-koin:koin-android:3.5.6") {
+        exclude(group = "org.jetbrains", module = "annotations-java5")
+    }
+    implementation("io.insert-koin:koin-androidx-compose:3.5.6") {
+        exclude(group = "org.jetbrains", module = "annotations-java5")
+    }
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
@@ -90,8 +94,3 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
 }
 
-configurations.all {
-    resolutionStrategy {
-        force("org.jetbrains:annotations:23.0.0")
-    }
-}
