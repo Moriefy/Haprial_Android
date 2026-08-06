@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.haprial.app"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.haprial.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
     }
@@ -42,7 +42,7 @@ android {
 
 dependencies {
     // Compose BOM
-    val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
+    val composeBom = platform("androidx.compose:compose-bom:2024.06.00")
     implementation(composeBom)
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui")
@@ -80,8 +80,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Koin (DI)
-    implementation("io.insert-koin:koin-android:4.0.0")
-    implementation("io.insert-koin:koin-androidx-compose:4.0.0")
+    implementation("io.insert-koin:koin-android:3.5.6")
+    implementation("io.insert-koin:koin-androidx-compose:3.5.6")
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
