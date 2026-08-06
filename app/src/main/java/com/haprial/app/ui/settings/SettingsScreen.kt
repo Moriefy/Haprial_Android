@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.haprial.app.ui.theme.ThemeMode
+import com.haprial.app.ui.theme.currentThemeMode
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +50,7 @@ fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel()
                                 onClick = {
                                     themeMode = mode
                                     prefs.edit().putString("theme", mode).apply()
+                                    currentThemeMode.value = mode
                                 },
                                 label = { Text(label) },
                                 leadingIcon = if (themeMode == mode) {{ Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }} else null

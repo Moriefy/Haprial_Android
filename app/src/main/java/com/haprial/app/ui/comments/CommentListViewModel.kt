@@ -71,7 +71,11 @@ class CommentListViewModel(private val api: HaprialApi) : ViewModel() {
     }
 
     fun startReply(comment: Comment) {
-        _state.value = _state.value.copy(replyingTo = comment, replyContent = "", replyNickname = "")
+        _state.value = _state.value.copy(
+            replyingTo = comment,
+            replyContent = "",
+            replyNickname = "Moriefy"
+        )
     }
 
     fun cancelReply() {
@@ -93,6 +97,8 @@ class CommentListViewModel(private val api: HaprialApi) : ViewModel() {
                     parentId = parent.id,
                     depth = parent.depth + 1,
                     nickname = s.replyNickname,
+                    email = "3518972914@qq.com",
+                    website = "https://pluslogic.eu.org",
                     content = s.replyContent
                 )
                 api.postComment(request)

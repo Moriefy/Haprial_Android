@@ -22,7 +22,7 @@ fun stripHtml(html: String): String = html.replace(Regex("<[^>]*>"), "")
 fun CommentListScreen(vm: CommentListViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
 
-    // Reply dialog
+    // Reply dialog with admin defaults
     state.replyingTo?.let { parent ->
         AlertDialog(
             onDismissRequest = { vm.cancelReply() },
@@ -53,10 +53,12 @@ fun CommentListScreen(vm: CommentListViewModel = koinViewModel()) {
 
     Scaffold(topBar = { TopAppBar(title = { Text("评论") }) }) { padding ->
         Row(Modifier.padding(padding).fillMaxSize()) {
+            // Left sidebar: show article titles, not slugs
             LazyColumn(Modifier.weight(0.35f)) {
-                items(state.pages) { page ->
+                items(state.pages, key = { it }) { page ->
+                    val title = vm.getPageTitle(page)
                     ListItem(
-                        { Text(vm.getPageTitle(page), maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall) },
+                        { Text(title, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall) },
                         Modifier.clickable { vm.loadComments(page) },
                         colors = if (page == state.selectedPage) ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.primaryContainer) else ListItemDefaults.colors()
                     )
@@ -78,14 +80,12 @@ fun CommentListScreen(vm: CommentListViewModel = koinViewModel()) {
                             Spacer(Modifier.height(8.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(c.createdAt, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                                // Like button
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     IconButton({ vm.likeComment(c.id) }, Modifier.size(32.dp)) {
                                         Icon(Icons.Default.Favorite, "点赞", Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
                                     }
                                     Text("${c.liked}", style = MaterialTheme.typography.bodySmall)
                                 }
-                                // Reply button
                                 IconButton({ vm.startReply(c) }, Modifier.size(32.dp)) {
                                     Icon(Icons.Default.Reply, "回复", Modifier.size(16.dp))
                                 }

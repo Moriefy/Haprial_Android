@@ -1,5 +1,7 @@
 package com.haprial.app.ui.navigation
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -60,7 +62,13 @@ fun HaprialNavGraph() {
             }
         }
     ) { padding ->
-        NavHost(navController, Screen.Articles.route, Modifier.padding(padding)) {
+        NavHost(
+            navController, Screen.Articles.route, Modifier.padding(padding),
+            enterTransition = { fadeIn(animationSpec = tween(150)) },
+            exitTransition = { fadeOut(animationSpec = tween(150)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(150)) },
+            popExitTransition = { fadeOut(animationSpec = tween(150)) }
+        ) {
             composable(Screen.Articles.route) {
                 ArticleListScreen(onArticleClick = { navController.navigate("editor/$it") }, onNewArticle = { navController.navigate("editor/0") })
             }
