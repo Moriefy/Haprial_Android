@@ -89,3 +89,9 @@ dependencies {
     // Core
     implementation("androidx.core:core-ktx:1.13.1")
 }
+
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains:annotations:23.0.0")
+    }
+}
