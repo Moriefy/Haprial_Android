@@ -46,16 +46,16 @@ import org.koin.androidx.compose.koinViewModel
 private data class MdAction(val icon: androidx.compose.ui.graphics.vector.ImageVector, val label: String, val prefix: String, val suffix: String)
 
 private val mdActions = listOf(
-    MdAction(Icons.Default.FormatBold, "粗体", "**", "**"),
-    MdAction(Icons.Default.FormatItalic, "斜体", "*", "*"),
-    MdAction(Icons.Default.FormatStrikethrough, "删除线", "~~", "~~"),
-    MdAction(Icons.Default.Title, "标题", "## ", ""),
-    MdAction(Icons.Default.Link, "链接", "[", "](url)"),
-    MdAction(Icons.Default.Image, "图片", "![", "](url)"),
-    MdAction(Icons.Default.Code, "代码", "`", "`"),
-    MdAction(Icons.Default.FormatQuote, "引用", "> ", ""),
-    MdAction(Icons.Default.FormatListBulleted, "列表", "- ", ""),
-    MdAction(Icons.Default.CheckBox, "任务", "- [ ] ", ""),
+    MdAction(Icons.Filled.FormatBold, "粗体", "**", "**"),
+    MdAction(Icons.Filled.FormatItalic, "斜体", "*", "*"),
+    MdAction(Icons.Filled.FormatStrikethrough, "删除线", "~~", "~~"),
+    MdAction(Icons.Filled.Title, "标题", "## ", ""),
+    MdAction(Icons.Filled.Link, "链接", "[", "](url)"),
+    MdAction(Icons.Filled.Image, "图片", "![", "](url)"),
+    MdAction(Icons.Filled.Code, "代码", "`", "`"),
+    MdAction(Icons.Filled.FormatQuote, "引用", "> ", ""),
+    MdAction(Icons.Filled.FormatListBulleted, "列表", "- ", ""),
+    MdAction(Icons.Filled.CheckBox, "任务", "- [ ] ", ""),
 )
 
 @OptIn(UnstableSaltApi::class)
@@ -99,7 +99,7 @@ fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinV
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TitleBarButton(onClick = { showPreview = false }) {
-                        Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Close), contentDescription = "关闭")
+                        Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Filled.Close), contentDescription = "关闭")
                     }
                     Spacer(Modifier.width(8.dp))
                     Text("预览", fontWeight = FontWeight.SemiBold, fontSize = 17.sp)
@@ -153,11 +153,11 @@ fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinV
 
             // 预览
             TitleBarButton(onClick = { showPreview = true }) {
-                Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Visibility), contentDescription = "预览")
+                Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Filled.Visibility), contentDescription = "预览")
             }
             // 保存草稿
             TitleBarButton(onClick = { vm.save("draft") }) {
-                Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Save), contentDescription = "存草稿")
+                Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Filled.Save), contentDescription = "存草稿")
             }
             // 发布
             TitleBarButton(onClick = { vm.save("published") }) {
@@ -165,7 +165,7 @@ fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinV
                     CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = SaltTheme.colors.highlight)
                 } else {
                     Icon(
-                        painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Publish),
+                        painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Filled.Publish),
                         contentDescription = "发布",
                         tint = SaltTheme.colors.highlight
                     )
@@ -218,7 +218,7 @@ fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinV
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                     TextButton(onClick = { showMeta = false }) {
                         Icon(
-                            painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.ExpandLess),
+                            painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Filled.ExpandLess),
                             contentDescription = "收起",
                             modifier = Modifier.size(18.dp)
                         )
@@ -247,7 +247,7 @@ fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinV
                         modifier = Modifier.weight(1f)
                     )
                     Icon(
-                        painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.ExpandMore),
+                        painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Filled.ExpandMore),
                         contentDescription = "展开",
                         modifier = Modifier.size(18.dp),
                         tint = SaltTheme.colors.subText
@@ -368,10 +368,10 @@ private fun EditorField(
             if (value.isEmpty()) {
                 Text(placeholder, color = SaltTheme.colors.subText.copy(alpha = 0.5f), fontSize = 14.sp)
             }
-            androidx.compose.material3.BasicTextField(
+            androidx.compose.foundation.text.BasicTextField(
                 value = value,
                 onValueChange = onChange,
-                readOnly = readOnly,
+                enabled = !readOnly,
                 singleLine = singleLine,
                 textStyle = androidx.compose.ui.text.TextStyle(fontSize = 14.sp, color = SaltTheme.colors.text),
                 modifier = Modifier.fillMaxWidth()
