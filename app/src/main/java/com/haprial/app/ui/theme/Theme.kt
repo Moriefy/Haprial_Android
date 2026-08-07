@@ -10,29 +10,26 @@ import com.moriafly.salt.ui.saltConfigs
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
-// Global reactive theme state - updated from SettingsScreen
+// 全局主题状态 — SettingsScreen 修改后立即生效
 var currentThemeMode = mutableStateOf("system")
 
 @Composable
 fun HaprialTheme(content: @Composable () -> Unit) {
     val ctx = LocalContext.current
-    // Read from SharedPreferences on first composition, then use reactive state
+
+    // 首次加载时从 SharedPreferences 读取
     LaunchedEffect(Unit) {
         val prefs = ctx.getSharedPreferences("haprial_theme", Context.MODE_PRIVATE)
         currentThemeMode.value = prefs.getString("theme", "system") ?: "system"
     }
 
+    // 直接读取 reactive state，不用 LaunchedEffect 中转
     val themeModeValue by currentThemeMode
-    val themeMode = when (themeModeValue) {
-        "light" -> ThemeMode.LIGHT
-        "dark" -> ThemeMode.DARK
-        else -> ThemeMode.SYSTEM
-    }
 
-    val darkTheme = when (themeMode) {
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    val darkTheme = when (themeModeValue) {
+        "light" -> false
+        "dark" -> true
+        else -> isSystemInDarkTheme()
     }
 
     SaltTheme(

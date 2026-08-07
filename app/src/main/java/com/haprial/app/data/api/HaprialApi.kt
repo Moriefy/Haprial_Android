@@ -62,6 +62,15 @@ interface HaprialApi {
     @GET("/api/admin/friends")
     suspend fun getFriends(): Response<FriendListResponse>
 
+    @POST("/api/admin/friends")
+    suspend fun createFriend(@Body body: Map<String, String>): Response<GenericResponse>
+
+    @PUT("/api/admin/friends/{id}")
+    suspend fun updateFriend(@Path("id") id: Int, @Body body: Map<String, String>): Response<GenericResponse>
+
+    @DELETE("/api/admin/friends/{id}")
+    suspend fun deleteFriend(@Path("id") id: Int): Response<GenericResponse>
+
     @GET("/api/admin/stats")
     suspend fun getStats(): Response<StatsResponse>
 
