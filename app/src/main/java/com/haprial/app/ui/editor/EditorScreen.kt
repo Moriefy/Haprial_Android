@@ -43,7 +43,6 @@ import com.moriafly.salt.ui.ItemEditPassword
 import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Surface
-import com.moriafly.salt.ui.Text
 import com.moriafly.salt.ui.TitleBar
 import com.moriafly.salt.ui.UnstableSaltApi
 import org.koin.androidx.compose.koinViewModel
