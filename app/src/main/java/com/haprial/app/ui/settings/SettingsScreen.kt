@@ -29,6 +29,7 @@ import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Surface
 import com.moriafly.salt.ui.TitleBar
 import com.moriafly.salt.ui.UnstableSaltApi
+import com.moriafly.salt.ui.ItemArrowType
 import androidx.compose.material3.Text
 import org.koin.compose.koinInject
 import org.koin.androidx.compose.koinViewModel
