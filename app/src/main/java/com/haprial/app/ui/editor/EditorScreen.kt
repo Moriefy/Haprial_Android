@@ -45,6 +45,7 @@ import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Surface
 import com.moriafly.salt.ui.TitleBar
 import com.moriafly.salt.ui.UnstableSaltApi
+import androidx.compose.material3.Text
 import org.koin.androidx.compose.koinViewModel
 
 // ── 工具栏按钮定义（对齐网页版）──
