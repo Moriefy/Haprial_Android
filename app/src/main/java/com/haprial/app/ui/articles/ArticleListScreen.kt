@@ -110,7 +110,6 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
                             }
                         }
                     },
-                    shape = RoundedCornerShape(12.dp)
                 )
                 // 筛选按钮
                 Box(Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(SaltTheme.colors.subBackground).clickable { showFilterSheet = true }, contentAlignment = Alignment.Center) {
