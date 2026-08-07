@@ -24,8 +24,14 @@ import coil.compose.AsyncImage
 import com.haprial.app.data.model.Friend
 import com.haprial.app.ui.components.StandardTitleBar
 import com.haprial.app.ui.components.TitleBarButton
-import com.moriafly.salt.ui.*
-import com.moriafly.salt.ui.dialog.YesNoDialog
+import com.moriafly.salt.ui.RoundedColumn
+import com.moriafly.salt.ui.SaltTheme
+import com.moriafly.salt.ui.Surface
+import com.moriafly.salt.ui.UnstableSaltApi
+import com.moriafly.salt.ui.RoundedColumn
+import com.moriafly.salt.ui.SaltTheme
+import com.moriafly.salt.ui.Surface
+import com.moriafly.salt.ui.UnstableSaltApi
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(UnstableSaltApi::class)

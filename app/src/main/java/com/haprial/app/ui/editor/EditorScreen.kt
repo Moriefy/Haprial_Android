@@ -36,7 +36,10 @@ import io.noties.markwon.linkify.LinkifyPlugin
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import com.haprial.app.ui.components.TitleBarButton
-import com.moriafly.salt.ui.*
+import com.moriafly.salt.ui.SaltTheme
+import com.moriafly.salt.ui.Surface
+import com.moriafly.salt.ui.Text
+import com.moriafly.salt.ui.UnstableSaltApi
 import org.koin.androidx.compose.koinViewModel
 
 private data class MdBtn(val icon: androidx.compose.ui.graphics.vector.ImageVector, val label: String, val prefix: String, val suffix: String)
