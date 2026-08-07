@@ -25,6 +25,18 @@ import org.koin.androidx.compose.koinViewModel
 fun TrashScreen(vm: TrashViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
     var showEmptyDialog by remember { mutableStateOf(false) }
+    var deleteTargetId by remember { mutableStateOf<Int?>(null) }
+
+    // 永久删除确认
+    deleteTargetId?.let { id ->
+        val targetItem = state.items.find { it.id == id }
+        YesNoDialog(
+            onDismissRequest = { deleteTargetId = null },
+            onConfirm = { deleteTargetId = null; vm.delete(id) },
+            title = "永久删除",
+            content = "确定永久删除「${targetItem?.title ?: ""}」？此操作不可撤销。"
+        )
+    }
 
     if (showEmptyDialog) {
         YesNoDialog(
@@ -72,7 +84,7 @@ fun TrashScreen(vm: TrashViewModel = koinViewModel()) {
                                 androidx.compose.material3.IconButton(onClick = { vm.restore(item.id) }) {
                                     Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Restore), contentDescription = "恢复", tint = SaltTheme.colors.highlight)
                                 }
-                                androidx.compose.material3.IconButton(onClick = { vm.delete(item.id) }) {
+                                IconButton(onClick = { deleteTargetId = item.id }) {
                                     Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.DeleteForever), contentDescription = "永久删除", tint = Color(0xFFE53935))
                                 }
                             }

@@ -26,10 +26,17 @@ class CommentListViewModel(private val api: HaprialApi) : ViewModel() {
     val state: StateFlow<CommentState> = _state
 
     init {
-        // 先加载文章标题映射，再加载评论页面列表，避免竞态条件
         viewModelScope.launch {
             loadArticleTitles()
             loadPages()
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            loadArticleTitles()
+            if (_state.value.selectedPage.isNotEmpty()) loadComments(_state.value.selectedPage)
+            else loadPages()
         }
     }
 

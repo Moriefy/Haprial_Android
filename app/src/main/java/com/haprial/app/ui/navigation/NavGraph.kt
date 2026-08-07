@@ -3,7 +3,6 @@ package com.haprial.app.ui.navigation
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -39,7 +38,16 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     data object Trash : Screen("trash", "回收站", Icons.Default.Delete)
     data object Settings : Screen("settings", "设置", Icons.Default.Settings)
 }
+
 val bottomScreens = listOf(Screen.Articles, Screen.Comments, Screen.Friends, Screen.Images, Screen.Trash, Screen.Settings)
+
+// ── 页面切换动画 ──
+private const val ANIM_DURATION = 200
+
+private fun enterTransition() = fadeIn(animationSpec = tween(ANIM_DURATION)) + slideInHorizontally(initialOffsetX = { it / 10 })
+private fun exitTransition() = fadeOut(animationSpec = tween(ANIM_DURATION))
+private fun popEnterTransition() = fadeIn(animationSpec = tween(ANIM_DURATION))
+private fun popExitTransition() = fadeOut(animationSpec = tween(ANIM_DURATION)) + slideOutHorizontally(targetOffsetX = { it / 10 })
 
 @OptIn(UnstableSaltApi::class)
 @Composable
@@ -49,24 +57,24 @@ fun HaprialNavGraph(authManager: AuthStateManager = koinInject()) {
     val currentRoute = navBackStack?.destination?.route
     var isLoggedIn by remember { mutableStateOf(false) }
 
-    if (!isLoggedIn) { LoginScreen(onLoginSuccess = { isLoggedIn = true }); return }
+    if (!isLoggedIn) {
+        LoginScreen(onLoginSuccess = { isLoggedIn = true })
+        return
+    }
 
     val showBottomBar = currentRoute in bottomScreens.map { it.route }
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(SaltTheme.colors.background)
+        modifier = Modifier.fillMaxSize().background(SaltTheme.colors.background)
     ) {
         Column(Modifier.fillMaxSize()) {
-            // Main content area
             Box(Modifier.weight(1f)) {
                 NavHost(
                     navController, Screen.Articles.route,
-                    enterTransition = { fadeIn(animationSpec = tween(150)) },
-                    exitTransition = { fadeOut(animationSpec = tween(150)) },
-                    popEnterTransition = { fadeIn(animationSpec = tween(150)) },
-                    popExitTransition = { fadeOut(animationSpec = tween(150)) }
+                    enterTransition = { enterTransition() },
+                    exitTransition = { exitTransition() },
+                    popEnterTransition = { popEnterTransition() },
+                    popExitTransition = { popExitTransition() }
                 ) {
                     composable(Screen.Articles.route) {
                         ArticleListScreen(onArticleClick = { navController.navigate("editor/$it") }, onNewArticle = { navController.navigate("editor/0") })
@@ -82,7 +90,6 @@ fun HaprialNavGraph(authManager: AuthStateManager = koinInject()) {
                 }
             }
 
-            // SaltUI Bottom Bar
             if (showBottomBar) {
                 BottomBar {
                     bottomScreens.forEach { screen ->
@@ -91,7 +98,8 @@ fun HaprialNavGraph(authManager: AuthStateManager = koinInject()) {
                             onClick = {
                                 navController.navigate(screen.route) {
                                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true; restoreState = true
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             },
                             painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(screen.icon),
