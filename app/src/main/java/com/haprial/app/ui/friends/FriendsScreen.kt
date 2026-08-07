@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.haprial.app.ui.components.StandardTitleBar
 import com.haprial.app.ui.components.TitleBarButton
 import com.haprial.app.data.model.Friend
 import com.moriafly.salt.ui.*
@@ -32,20 +33,8 @@ fun FriendsScreen(vm: FriendsViewModel = koinViewModel()) {
             .background(SaltTheme.colors.background)
     ) {
         Column(Modifier.fillMaxSize()) {
-            // Title bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    "友链",
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
-                )
-                Spacer(Modifier.weight(1f))
+            // 统一标题栏
+            StandardTitleBar(title = "友链") {
                 TitleBarButton(onClick = { vm.loadFriends() }) {
                     Icon(
                         painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Refresh),

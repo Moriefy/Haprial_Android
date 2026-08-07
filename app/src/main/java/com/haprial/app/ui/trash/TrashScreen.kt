@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.haprial.app.ui.components.StandardTitleBar
 import com.haprial.app.ui.components.TitleBarButton
 import com.moriafly.salt.ui.*
 import com.moriafly.salt.ui.dialog.YesNoDialog
@@ -40,17 +41,8 @@ fun TrashScreen(vm: TrashViewModel = koinViewModel()) {
             .background(SaltTheme.colors.background)
     ) {
         Column(Modifier.fillMaxSize()) {
-            // Title bar with actions
-            Row(
-                modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    "回收站",
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
-                )
-                Spacer(Modifier.weight(1f))
+            // 统一标题栏
+            StandardTitleBar(title = "回收站") {
                 TitleBarButton(onClick = { vm.loadTrash() }) {
                     Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Refresh), contentDescription = "刷新")
                 }

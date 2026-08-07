@@ -7,16 +7,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.haprial.app.data.model.Comment
 import com.moriafly.salt.ui.*
 import com.moriafly.salt.ui.dialog.YesNoDialog
@@ -40,6 +43,7 @@ fun buildCommentTree(comments: List<Comment>): List<CommentNode> {
 @Composable
 fun CommentListScreen(vm: CommentListViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
+    var showPageDropdown by remember { mutableStateOf(false) }
 
     // Reply dialog
     state.replyingTo?.let { parent ->
@@ -74,37 +78,53 @@ fun CommentListScreen(vm: CommentListViewModel = koinViewModel()) {
             .background(SaltTheme.colors.background)
     ) {
         Column(Modifier.fillMaxSize()) {
+            // 统一标题栏 + 文章选择器
             TitleBar(onBack = {}, text = "评论", showBackBtn = false)
 
-            Row(Modifier.fillMaxSize()) {
-                // Left panel: article titles
-                LazyColumn(Modifier.weight(0.35f)) {
-                    items(state.pages, key = { it }) { page ->
-                        val title = vm.getPageTitle(page)
-                        Item(
-                            onClick = { vm.loadComments(page) },
-                            text = title,
-                            arrowType = ItemArrowType.None
-                        )
+            // 文章选择下拉
+            if (state.pages.isNotEmpty()) {
+                Box(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    RoundedColumn {
+                        Box {
+                            Item(
+                                onClick = { showPageDropdown = true },
+                                text = vm.getPageTitle(state.selectedPage),
+                                sub = "点击切换文章",
+                                arrowType = com.moriafly.salt.ui.ItemArrowType.Arrow
+                            )
+                            DropdownMenu(
+                                expanded = showPageDropdown,
+                                onDismissRequest = { showPageDropdown = false }
+                            ) {
+                                state.pages.forEach { page ->
+                                    DropdownMenuItem(
+                                        text = { Text(vm.getPageTitle(page)) },
+                                        onClick = {
+                                            vm.loadComments(page)
+                                            showPageDropdown = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
-                ItemDivider(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(1.dp)
-                )
-                // Right panel: comment tree
-                if (state.isLoading) {
-                    Box(Modifier.weight(0.65f), Alignment.Center) {
-                        androidx.compose.material3.CircularProgressIndicator()
-                    }
-                } else if (state.comments.isEmpty()) {
-                    Box(Modifier.weight(0.65f), Alignment.Center) {
-                        Text("暂无评论", color = SaltTheme.colors.subText)
-                    }
-                } else {
+            }
+
+            // 评论列表
+            when {
+                state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+                state.comments.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    Text("暂无评论", color = SaltTheme.colors.subText)
+                }
+                else -> {
                     val tree = remember(state.comments) { buildCommentTree(state.comments) }
-                    LazyColumn(Modifier.weight(0.65f), contentPadding = PaddingValues(8.dp)) {
+                    LazyColumn(
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         tree.forEach { node ->
                             renderCommentNode(node, depth = 0, vm = vm)
                         }
@@ -150,41 +170,72 @@ fun CommentItem(
     RoundedColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = indent, top = 2.dp, bottom = 2.dp, end = 4.dp)
+            .padding(start = indent)
     ) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(comment.nickname, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium, modifier = Modifier.weight(1f))
+                Text(
+                    comment.nickname,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
+                )
                 if (comment.isAdmin == 1) {
-                    androidx.compose.material3.SuggestionChip(onClick = {}, label = { Text("博主") }, modifier = Modifier.height(24.dp))
+                    SuggestionChip(onClick = {}, label = { Text("博主") }, modifier = Modifier.height(24.dp))
                     Spacer(Modifier.width(4.dp))
                 }
                 if (comment.pinned == 1) {
-                    androidx.compose.material3.SuggestionChip(onClick = {}, label = { Text("置顶") }, modifier = Modifier.height(24.dp))
+                    SuggestionChip(onClick = {}, label = { Text("置顶") }, modifier = Modifier.height(24.dp))
                 }
             }
             Spacer(Modifier.height(4.dp))
-            Text(stripHtml(comment.contentHtml), style = SaltTheme.textStyles.main, maxLines = 10, overflow = TextOverflow.Ellipsis)
+            Text(
+                stripHtml(comment.contentHtml),
+                style = SaltTheme.textStyles.main,
+                maxLines = 10,
+                overflow = TextOverflow.Ellipsis
+            )
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(comment.createdAt, style = SaltTheme.textStyles.sub, color = SaltTheme.colors.subText, modifier = Modifier.weight(1f))
-                // Like
-                androidx.compose.material3.IconButton(onClick = onLike, modifier = Modifier.size(32.dp)) {
-                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Favorite), contentDescription = "点赞", modifier = Modifier.size(16.dp), tint = if (comment.liked > 0) Color(0xFFE53935) else SaltTheme.colors.subText)
+                Text(
+                    comment.createdAt,
+                    style = SaltTheme.textStyles.sub,
+                    color = SaltTheme.colors.subText,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onLike, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Favorite),
+                        contentDescription = "点赞",
+                        modifier = Modifier.size(16.dp),
+                        tint = if (comment.liked > 0) Color(0xFFE53935) else SaltTheme.colors.subText
+                    )
                 }
                 if (comment.liked > 0) {
                     Text("${comment.liked}", style = SaltTheme.textStyles.sub, color = Color(0xFFE53935))
                 }
                 if (depth < 2) {
-                    androidx.compose.material3.IconButton(onClick = onReply, modifier = Modifier.size(32.dp)) {
-                        Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Reply), contentDescription = "回复", modifier = Modifier.size(16.dp))
+                    IconButton(onClick = onReply, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Reply),
+                            contentDescription = "回复",
+                            modifier = Modifier.size(16.dp)
+                        )
                     }
                 }
-                androidx.compose.material3.IconButton(onClick = onPin, modifier = Modifier.size(32.dp)) {
-                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.PushPin), contentDescription = "置顶", modifier = Modifier.size(16.dp))
+                IconButton(onClick = onPin, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.PushPin),
+                        contentDescription = "置顶",
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
-                androidx.compose.material3.IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Delete), contentDescription = "删除", modifier = Modifier.size(16.dp), tint = Color(0xFFE53935))
+                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Delete),
+                        contentDescription = "删除",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color(0xFFE53935)
+                    )
                 }
             }
         }

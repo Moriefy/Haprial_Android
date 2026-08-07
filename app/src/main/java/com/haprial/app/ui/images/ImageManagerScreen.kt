@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.haprial.app.ui.components.StandardTitleBar
 import com.haprial.app.ui.components.TitleBarButton
 import com.moriafly.salt.ui.*
 import com.moriafly.salt.ui.dialog.YesNoDialog
@@ -183,28 +184,14 @@ fun ImageManagerScreen(vm: ImageManagerViewModel = koinViewModel()) {
             .background(SaltTheme.colors.background)
     ) {
         Column(Modifier.fillMaxSize()) {
-            // Title bar
-            Row(
-                modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            // 统一标题栏
+            StandardTitleBar(
+                title = if (state.currentFolder.isEmpty()) "图片" else state.currentFolder
             ) {
                 if (state.currentFolder.isNotEmpty()) {
                     TitleBarButton(onClick = { vm.goBack() }) {
                         Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.AutoMirrored.Filled.ArrowBack), contentDescription = "返回")
                     }
-                }
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    if (state.currentFolder.isEmpty()) "图片" else state.currentFolder,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
-                )
-                Spacer(Modifier.weight(1f))
-                if (state.isUploading) {
-                    androidx.compose.material3.CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(Modifier.width(8.dp))
                 }
                 TitleBarButton(onClick = { imagePickerLauncher.launch("image/*") }) {
                     Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Add), contentDescription = "上传图片")
