@@ -56,13 +56,13 @@ private val mdActions = listOf(
     MdAction(Icons.Filled.FormatStrikethrough, "删除线", "~~", "~~"),
     MdAction(Icons.Filled.Code, "行内代码", "`", "`"),
     MdAction(Icons.Filled.Code, "代码块", "\n```\n", "\n```\n"),
-    MdAction(Icons.Filled.Title, "H2", "## ", ""),
-    MdAction(Icons.Filled.Title, "H3", "### ", ""),
+    MdAction(Icons.Filled.ShortText, "H2", "## ", ""),
+    MdAction(Icons.Filled.ShortText, "H3", "### ", ""),
     MdAction(Icons.Filled.Link, "链接", "[text](", ")"),
     MdAction(Icons.Filled.Image, "图片", "![alt](", ")"),
     MdAction(Icons.Filled.FormatQuote, "引用", "> ", ""),
     MdAction(Icons.Filled.FormatListBulleted, "无序列表", "- ", ""),
-    MdAction(Icons.Filled.Remove, "分割线", "\n---\n", ""),
+    MdAction(Icons.Filled.HorizontalRule, "分割线", "\n---\n", ""),
 )
 
 @OptIn(UnstableSaltApi::class)
