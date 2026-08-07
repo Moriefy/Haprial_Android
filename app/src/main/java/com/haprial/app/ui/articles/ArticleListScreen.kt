@@ -24,6 +24,8 @@ import com.haprial.app.data.model.Article
 import com.haprial.app.ui.components.StandardTitleBar
 import com.haprial.app.ui.components.TitleBarButton
 import com.moriafly.salt.ui.*
+import com.moriafly.salt.ui.dialog.YesNoDialog
+import androidx.compose.material3.TextButton
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, UnstableSaltApi::class)
@@ -130,7 +132,7 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
                         Text(if (searchQuery.isBlank()) "还没有文章" else "没有找到匹配的文章", color = SaltTheme.colors.subText)
                         if (searchQuery.isBlank()) {
                             Spacer(Modifier.height(8.dp))
-                            Button(onClick = onNewArticle, appearance = ButtonAppearance.Subtle) { Text("写第一篇文章") }
+                            TextButton(onClick = onNewArticle) { Text("写第一篇文章") }
                         }
                     }
                 }
