@@ -108,9 +108,6 @@ dependencies {
         exclude(group = "org.jetbrains", module = "annotations-java5")
     }
 
-    // DataStore
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-
     // Core
     implementation("androidx.core:core-ktx:1.13.1")
 }

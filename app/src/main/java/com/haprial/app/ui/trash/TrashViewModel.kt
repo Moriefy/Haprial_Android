@@ -29,19 +29,37 @@ class TrashViewModel(private val api: HaprialApi) : ViewModel() {
 
     fun restore(id: Int) {
         viewModelScope.launch {
-            try { api.restoreTrash(id); loadTrash() } catch (_: Exception) {}
+            try {
+                val resp = api.restoreTrash(id)
+                if (resp.isSuccessful) loadTrash()
+                else _state.value = _state.value.copy(error = "恢复失败")
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = "恢复失败: ${e.message}")
+            }
         }
     }
 
     fun delete(id: Int) {
         viewModelScope.launch {
-            try { api.deleteTrash(id); loadTrash() } catch (_: Exception) {}
+            try {
+                val resp = api.deleteTrash(id)
+                if (resp.isSuccessful) loadTrash()
+                else _state.value = _state.value.copy(error = "删除失败")
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = "删除失败: ${e.message}")
+            }
         }
     }
 
     fun emptyTrash() {
         viewModelScope.launch {
-            try { api.emptyTrash(); loadTrash() } catch (_: Exception) {}
+            try {
+                val resp = api.emptyTrash()
+                if (resp.isSuccessful) loadTrash()
+                else _state.value = _state.value.copy(error = "清空失败")
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = "清空失败: ${e.message}")
+            }
         }
     }
 }

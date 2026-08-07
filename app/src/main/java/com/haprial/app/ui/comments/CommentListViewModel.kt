@@ -14,6 +14,7 @@ data class CommentState(
     val pages: List<String> = emptyList(),
     val selectedPage: String = "",
     val isLoading: Boolean = true,
+    val error: String? = null,
     val slugTitleMap: Map<String, String> = emptyMap(),
     val replyingTo: Comment? = null,
     val replyContent: String = "",
@@ -59,15 +60,38 @@ class CommentListViewModel(private val api: HaprialApi) : ViewModel() {
     }
 
     fun deleteComment(id: Int) {
-        viewModelScope.launch { try { api.deleteComment(id); loadComments(_state.value.selectedPage) } catch (_: Exception) {} }
+        viewModelScope.launch {
+            try {
+                val resp = api.deleteComment(id)
+                if (resp.isSuccessful) loadComments(_state.value.selectedPage)
+                else _state.value = _state.value.copy(error = "删除失败")
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = "删除失败: ${e.message}")
+            }
+        }
     }
 
     fun pinComment(id: Int) {
-        viewModelScope.launch { try { api.pinComment(id); loadComments(_state.value.selectedPage) } catch (_: Exception) {} }
+        viewModelScope.launch {
+            try {
+                val resp = api.pinComment(id)
+                if (resp.isSuccessful) loadComments(_state.value.selectedPage)
+                else _state.value = _state.value.copy(error = "置顶失败")
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = "置顶失败: ${e.message}")
+            }
+        }
     }
 
     fun likeComment(id: Int) {
-        viewModelScope.launch { try { api.likeComment(id); loadComments(_state.value.selectedPage) } catch (_: Exception) {} }
+        viewModelScope.launch {
+            try {
+                api.likeComment(id)
+                loadComments(_state.value.selectedPage)
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = "点赞失败: ${e.message}")
+            }
+        }
     }
 
     fun startReply(comment: Comment) {
@@ -101,10 +125,16 @@ class CommentListViewModel(private val api: HaprialApi) : ViewModel() {
                     website = "https://pluslogic.eu.org",
                     content = s.replyContent
                 )
-                api.postComment(request)
-                _state.value = _state.value.copy(replyingTo = null, replyContent = "", replyNickname = "")
-                loadComments(s.selectedPage)
-            } catch (_: Exception) {}
+                val resp = api.postComment(request)
+                if (resp.isSuccessful) {
+                    _state.value = _state.value.copy(replyingTo = null, replyContent = "", replyNickname = "")
+                    loadComments(s.selectedPage)
+                } else {
+                    _state.value = _state.value.copy(error = "回复失败: ${resp.body()?.error ?: "服务器错误"}")
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = "回复失败: ${e.message}")
+            }
         }
     }
 

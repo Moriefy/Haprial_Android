@@ -2,7 +2,10 @@ package com.haprial.app.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+
+private val gson by lazy { Gson() }
 
 data class LoginResponse(val ok: Boolean, val token: String? = null, val message: String? = null, val error: String? = null)
 data class GenericResponse(val ok: Boolean, val error: String? = null, val github: GithubResult? = null)
@@ -26,7 +29,7 @@ data class Article(
     @SerializedName("updated_at") val updatedAt: String? = null
 ) {
     fun tagList(): List<String> = try {
-        if (tags.startsWith("[")) com.google.gson.Gson().fromJson(tags, Array<String>::class.java).toList()
+        if (tags.startsWith("[")) gson.fromJson(tags, Array<String>::class.java).toList()
         else tags.split(",").map { it.trim() }.filter { it.isNotEmpty() }
     } catch (e: Exception) { emptyList() }
 }

@@ -5,7 +5,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Base64
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -25,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.haprial.app.ui.components.TitleBarButton
 import com.moriafly.salt.ui.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,6 +45,44 @@ fun ImageManagerScreen(vm: ImageManagerViewModel = koinViewModel()) {
     var previewImage by remember { mutableStateOf<String?>(null) }
     var deleteTarget by remember { mutableStateOf<String?>(null) }
     var isDownloading by remember { mutableStateOf(false) }
+
+    // Image picker launcher
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            scope.launch {
+                try {
+                    val inputStream = ctx.contentResolver.openInputStream(it)
+                    val bytes = inputStream?.readBytes()
+                    inputStream?.close()
+                    if (bytes != null) {
+                        val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+                        val fileName = "upload_${System.currentTimeMillis()}.jpg"
+                        vm.uploadImage(base64, fileName)
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(ctx, "读取图片失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    // Upload success toast
+    LaunchedEffect(state.uploadSuccess) {
+        if (state.uploadSuccess) {
+            Toast.makeText(ctx, "上传成功", Toast.LENGTH_SHORT).show()
+            vm.clearUploadSuccess()
+        }
+    }
+
+    // Error toast
+    LaunchedEffect(state.error) {
+        state.error?.let {
+            Toast.makeText(ctx, it, Toast.LENGTH_SHORT).show()
+            vm.clearError()
+        }
+    }
 
     // Delete confirmation dialog
     deleteTarget?.let { path ->
@@ -154,6 +196,16 @@ fun ImageManagerScreen(vm: ImageManagerViewModel = koinViewModel()) {
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
                 )
                 Spacer(Modifier.weight(1f))
+                if (state.isUploading) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                TitleBarButton(onClick = { imagePickerLauncher.launch("image/*") }) {
+                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Add), contentDescription = "上传图片")
+                }
                 TitleBarButton(onClick = { vm.loadImages(state.currentFolder) }) {
                     Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Refresh), contentDescription = "刷新")
                 }

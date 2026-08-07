@@ -26,6 +26,29 @@ class ArticleListViewModel(private val api: HaprialApi, private val dao: Article
             } catch (e: Exception) { _state.value = _state.value.copy(isLoading = false, error = e.message) }
         }
     }
-    fun deleteArticle(id: Int) { viewModelScope.launch { try { api.deleteArticle(id); loadArticles() } catch (_: Exception) {} } }
-    fun togglePublish(id: Int) { viewModelScope.launch { try { api.togglePublish(id); loadArticles() } catch (_: Exception) {} } }
+    fun deleteArticle(id: Int) {
+        viewModelScope.launch {
+            try {
+                val resp = api.deleteArticle(id)
+                if (resp.isSuccessful) loadArticles()
+                else _state.value = _state.value.copy(error = "删除失败: ${resp.body()?.error ?: "未知错误"}")
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = "删除失败: ${e.message}")
+            }
+        }
+    }
+
+    fun togglePublish(id: Int) {
+        viewModelScope.launch {
+            try {
+                val resp = api.togglePublish(id)
+                if (resp.isSuccessful) loadArticles()
+                else _state.value = _state.value.copy(error = "操作失败: ${resp.body()?.error ?: "未知错误"}")
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = "操作失败: ${e.message}")
+            }
+        }
+    }
+
+    fun clearError() { _state.value = _state.value.copy(error = null) }
 }

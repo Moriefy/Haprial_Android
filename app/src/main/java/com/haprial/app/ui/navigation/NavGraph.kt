@@ -18,27 +18,31 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.haprial.app.data.auth.AuthStateManager
 import com.haprial.app.ui.articles.ArticleListScreen
 import com.haprial.app.ui.editor.EditorScreen
 import com.haprial.app.ui.comments.CommentListScreen
+import com.haprial.app.ui.friends.FriendsScreen
 import com.haprial.app.ui.images.ImageManagerScreen
 import com.haprial.app.ui.settings.SettingsScreen
 import com.haprial.app.ui.settings.LoginScreen
 import com.haprial.app.ui.trash.TrashScreen
 import com.moriafly.salt.ui.*
+import org.koin.compose.koinInject
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     data object Articles : Screen("articles", "文章", Icons.Default.Article)
     data object Comments : Screen("comments", "评论", Icons.Default.Comment)
+    data object Friends : Screen("friends", "友链", Icons.Default.People)
     data object Images : Screen("images", "图片", Icons.Default.Image)
     data object Trash : Screen("trash", "回收站", Icons.Default.Delete)
     data object Settings : Screen("settings", "设置", Icons.Default.Settings)
 }
-val bottomScreens = listOf(Screen.Articles, Screen.Comments, Screen.Images, Screen.Trash, Screen.Settings)
+val bottomScreens = listOf(Screen.Articles, Screen.Comments, Screen.Friends, Screen.Images, Screen.Trash, Screen.Settings)
 
 @OptIn(UnstableSaltUiApi::class)
 @Composable
-fun HaprialNavGraph() {
+fun HaprialNavGraph(authManager: AuthStateManager = koinInject()) {
     val navController = rememberNavController()
     val navBackStack by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStack?.destination?.route
@@ -70,9 +74,10 @@ fun HaprialNavGraph() {
                         EditorScreen(it.arguments?.getString("id")?.toIntOrNull() ?: 0, onBack = { navController.popBackStack() })
                     }
                     composable(Screen.Comments.route) { CommentListScreen() }
+                    composable(Screen.Friends.route) { FriendsScreen() }
                     composable(Screen.Images.route) { ImageManagerScreen() }
                     composable(Screen.Trash.route) { TrashScreen() }
-                    composable(Screen.Settings.route) { SettingsScreen(onLogout = { isLoggedIn = false }) }
+                    composable(Screen.Settings.route) { SettingsScreen(onLogout = { isLoggedIn = false; authManager.logout() }) }
                 }
             }
 

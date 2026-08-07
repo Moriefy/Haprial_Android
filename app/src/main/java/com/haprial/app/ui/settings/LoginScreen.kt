@@ -8,45 +8,34 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.haprial.app.data.api.ApiClient
+import com.haprial.app.data.auth.AuthStateManager
 import com.moriafly.salt.ui.*
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @OptIn(UnstableSaltUiApi::class)
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
-    val ctx = LocalContext.current
+fun LoginScreen(onLoginSuccess: () -> Unit, authManager: AuthStateManager = koinInject()) {
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     var checkingToken by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
-    val prefs = remember { ctx.getSharedPreferences("haprial_auth", 0) }
 
-    // Check saved token on init
+    // 检查已保存的 token
     LaunchedEffect(Unit) {
-        val savedToken = prefs.getString("token", null)
-        if (!savedToken.isNullOrBlank()) {
-            try {
-                val api = ApiClient.create(ctx)
-                val resp = api.verify()
-                if (resp.isSuccessful && resp.body()?.ok == true) {
-                    onLoginSuccess()
-                    return@LaunchedEffect
-                }
-            } catch (_: Exception) {}
-            prefs.edit().remove("token").apply()
+        if (authManager.checkAuth()) {
+            onLoginSuccess()
+            return@LaunchedEffect
         }
         checkingToken = false
     }
 
     if (checkingToken) {
         Box(Modifier.fillMaxSize().background(SaltTheme.colors.background), Alignment.Center) {
-            // Loading indicator - use Material3 CircularProgressIndicator as SaltUI doesn't have one
             androidx.compose.material3.CircularProgressIndicator()
         }
         return
@@ -81,7 +70,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             )
             Spacer(Modifier.height(32.dp))
 
-            // Password input using SaltUI ItemEditPassword
             RoundedColumn {
                 ItemEditPassword(
                     text = password,
@@ -100,15 +88,13 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 onClick = {
                     if (password.isBlank()) return@Button
                     loading = true
+                    error = null
                     scope.launch {
-                        try {
-                            val resp = ApiClient.create(ctx).login(mapOf("password" to password))
-                            if (resp.isSuccessful && resp.body()?.ok == true) {
-                                ctx.getSharedPreferences("haprial_auth", 0)
-                                    .edit().putString("token", resp.body()!!.token!!).apply()
-                                onLoginSuccess()
-                            } else error = resp.body()?.error ?: "登录失败"
-                        } catch (_: Exception) { error = "网络错误" }
+                        val result = authManager.login(password)
+                        result.fold(
+                            onSuccess = { onLoginSuccess() },
+                            onFailure = { error = it.message }
+                        )
                         loading = false
                     }
                 },

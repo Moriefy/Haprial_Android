@@ -10,13 +10,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.haprial.app.data.auth.AuthStateManager
 import com.haprial.app.ui.theme.currentThemeMode
 import com.moriafly.salt.ui.*
+import org.koin.compose.koinInject
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(UnstableSaltUiApi::class)
 @Composable
-fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel()) {
+fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel(), authManager: AuthStateManager = koinInject()) {
     val stats by vm.stats.collectAsState()
     val ctx = LocalContext.current
     val prefs = remember { ctx.getSharedPreferences("haprial_theme", Context.MODE_PRIVATE) }
@@ -94,7 +96,7 @@ fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel()
                     RoundedColumn {
                         ItemButton(
                             onClick = {
-                                ctx.getSharedPreferences("haprial_auth", 0).edit().clear().apply()
+                                authManager.logout()
                                 onLogout()
                             },
                             text = "退出登录",
