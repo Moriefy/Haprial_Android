@@ -10,10 +10,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.TitleBar
+import com.moriafly.salt.ui.UnstableSaltApi
 
 /**
  * 统一标题栏 - 无操作按钮
  */
+@OptIn(UnstableSaltApi::class)
 @Composable
 fun StandardTitleBar(title: String) {
     TitleBar(onBack = {}, text = title, showBackBtn = false)
