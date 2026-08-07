@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -117,7 +118,7 @@ fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel()
 
 // Use Material3 LazyColumn since SaltUI doesn't have one
 @Composable
-private fun LazyColumn(content: @Composable androidx.compose.foundation.lazy.LazyListScope.() -> Unit) {
+private fun LazyColumn(content: LazyListScope.() -> Unit) {
     androidx.compose.foundation.lazy.LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
         contentPadding = PaddingValues(vertical = 16.dp),
