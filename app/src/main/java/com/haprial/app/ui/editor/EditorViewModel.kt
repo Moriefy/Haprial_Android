@@ -67,7 +67,7 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
                         _state.value = _state.value.copy(isSaving = false, isSaved = true, isNew = false)
                         dao.deleteDraft(0)
                     } else {
-                        _state.value = _state.value.copy(isSaving = false, error = "保存失败: ${r.body()?.error ?: "服务器错误"}")
+                        _state.value = _state.value.copy(isSaving = false, error = "保存失败: ${"服务器错误"}")
                     }
                 } else {
                     val r = api.updateArticle(articleId, body)
@@ -75,7 +75,7 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
                         _state.value = _state.value.copy(isSaving = false, isSaved = true)
                         dao.deleteDraft(articleId)
                     } else {
-                        _state.value = _state.value.copy(isSaving = false, error = "保存失败: ${r.body()?.error ?: "服务器错误"}")
+                        _state.value = _state.value.copy(isSaving = false, error = "保存失败: ${"服务器错误"}")
                     }
                 }
             } catch (e: Exception) {

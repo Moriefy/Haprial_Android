@@ -48,7 +48,7 @@ fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel()
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                                     listOf("${s.published}" to "已发布", "${s.drafts}" to "草稿", "${s.comments}" to "评论", "${s.friends}" to "友链").forEach { (v, l) ->
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text(v, fontSize = androidx.compose.ui.unit.sp(24), color = SaltTheme.colors.highlight, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                                            Text(v, fontSize = 24.sp, color = SaltTheme.colors.highlight, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                                             Text(l, style = SaltTheme.textStyles.sub, color = SaltTheme.colors.subText)
                                         }
                                     }
@@ -116,7 +116,6 @@ fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel()
 }
 
 // Use Material3 LazyColumn since SaltUI doesn't have one
-@Composable
 @Composable
 private fun LazyColumn(content: @Composable androidx.compose.foundation.lazy.LazyListScope.() -> Unit) {
     androidx.compose.foundation.lazy.LazyColumn(
