@@ -7,8 +7,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -18,7 +21,7 @@ import com.haprial.app.data.model.Friend
 import com.moriafly.salt.ui.*
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(UnstableSaltUiApi::class)
+@OptIn(UnstableSaltApi::class)
 @Composable
 fun FriendsScreen(vm: FriendsViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
@@ -56,7 +59,7 @@ fun FriendsScreen(vm: FriendsViewModel = koinViewModel()) {
                     androidx.compose.material3.CircularProgressIndicator()
                 }
                 state.error != null -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    Text(state.error!!, color = SaltTheme.colors.error)
+                    Text(state.error!!, color = Color(0xFFE53935))
                 }
                 state.friends.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                     Text("暂无友链", color = SaltTheme.colors.subText)
@@ -74,7 +77,7 @@ fun FriendsScreen(vm: FriendsViewModel = koinViewModel()) {
     }
 }
 
-@OptIn(UnstableSaltUiApi::class)
+@OptIn(UnstableSaltApi::class)
 @Composable
 private fun FriendItem(friend: Friend) {
     RoundedColumn {

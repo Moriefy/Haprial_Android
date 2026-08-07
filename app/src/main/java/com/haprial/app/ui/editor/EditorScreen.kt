@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -27,11 +28,14 @@ import io.noties.markwon.editor.MarkwonEditor
 import io.noties.markwon.editor.MarkwonEditorTextWatcher
 import io.noties.markwon.ext.tables.TablePlugin
 import io.noties.markwon.linkify.LinkifyPlugin
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
 import com.haprial.app.ui.components.TitleBarButton
 import com.moriafly.salt.ui.*
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(UnstableSaltUiApi::class)
+@OptIn(UnstableSaltApi::class)
 @Composable
 fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
@@ -139,7 +143,7 @@ fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinV
                             ItemEdit(text = state.tags, onChange = { vm.updateTags(it) }, hint = "标签（逗号分隔）")
                         }
                         state.error?.let {
-                            Text(it, color = SaltTheme.colors.error, modifier = Modifier.padding(horizontal = 16.dp), style = SaltTheme.textStyles.sub)
+                            Text(it, color = Color(0xFFE53935), modifier = Modifier.padding(horizontal = 16.dp), style = SaltTheme.textStyles.sub)
                         }
                         ItemDivider()
                     }
@@ -148,9 +152,8 @@ fun EditorScreen(articleId: Int, onBack: () -> Unit, vm: EditorViewModel = koinV
                 // Collapsed state: expand button
                 if (!metaExpanded) {
                     Box(Modifier.fillMaxWidth().padding(8.dp), Alignment.CenterEnd) {
-                        Button(
-                            onClick = { metaExpanded = true },
-                            appearance = ButtonAppearance.Subtle
+                        TextButton(
+                            onClick = { metaExpanded = true }
                         ) {
                             Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.ExpandMore), contentDescription = "展开信息", modifier = Modifier.size(20.dp))
                         }

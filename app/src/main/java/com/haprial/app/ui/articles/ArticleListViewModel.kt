@@ -43,7 +43,7 @@ class ArticleListViewModel(private val api: HaprialApi, private val dao: Article
             try {
                 val resp = api.togglePublish(id)
                 if (resp.isSuccessful) loadArticles()
-                else _state.value = _state.value.copy(error = "操作失败: ${resp.body()?.error ?: "未知错误"}")
+                else _state.value = _state.value.copy(error = "操作失败")
             } catch (e: Exception) {
                 _state.value = _state.value.copy(error = "操作失败: ${e.message}")
             }

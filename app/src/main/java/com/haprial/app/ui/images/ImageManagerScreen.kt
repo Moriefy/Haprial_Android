@@ -19,6 +19,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,13 +33,14 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.haprial.app.ui.components.TitleBarButton
 import com.moriafly.salt.ui.*
+import com.moriafly.salt.ui.dialog.YesNoDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import java.net.URL
 
-@OptIn(ExperimentalFoundationApi::class, UnstableSaltUiApi::class)
+@OptIn(ExperimentalFoundationApi::class, UnstableSaltApi::class)
 @Composable
 fun ImageManagerScreen(vm: ImageManagerViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
@@ -114,7 +118,7 @@ fun ImageManagerScreen(vm: ImageManagerViewModel = koinViewModel()) {
                     if (isDownloading) {
                         androidx.compose.material3.CircularProgressIndicator(Modifier.size(24.dp), color = SaltTheme.colors.text)
                     } else {
-                        Button(
+                        TextButton(
                             onClick = {
                                 isDownloading = true
                                 scope.launch {
@@ -160,8 +164,7 @@ fun ImageManagerScreen(vm: ImageManagerViewModel = koinViewModel()) {
                                     }
                                     isDownloading = false
                                 }
-                            },
-                            appearance = ButtonAppearance.Subtle
+                            }
                         ) {
                             Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Download), contentDescription = "下载")
                         }

@@ -4,8 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
@@ -16,7 +20,7 @@ import com.moriafly.salt.ui.*
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-@OptIn(UnstableSaltUiApi::class)
+@OptIn(UnstableSaltApi::class)
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit, authManager: AuthStateManager = koinInject()) {
     var password by remember { mutableStateOf("") }
@@ -80,7 +84,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, authManager: AuthStateManager = koin
 
             error?.let {
                 Spacer(Modifier.height(8.dp))
-                Text(it, color = SaltTheme.colors.error, style = SaltTheme.textStyles.sub)
+                Text(it, color = Color(0xFFE53935), style = SaltTheme.textStyles.sub)
             }
             Spacer(Modifier.height(24.dp))
 

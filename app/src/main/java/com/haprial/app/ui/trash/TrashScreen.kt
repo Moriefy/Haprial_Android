@@ -6,15 +6,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.haprial.app.ui.components.TitleBarButton
 import com.moriafly.salt.ui.*
+import com.moriafly.salt.ui.dialog.YesNoDialog
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(UnstableSaltUiApi::class)
+@OptIn(UnstableSaltApi::class)
 @Composable
 fun TrashScreen(vm: TrashViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
@@ -59,7 +64,7 @@ fun TrashScreen(vm: TrashViewModel = koinViewModel()) {
                     androidx.compose.material3.CircularProgressIndicator()
                 }
                 state.error != null -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    Text(state.error!!, color = SaltTheme.colors.error)
+                    Text(state.error!!, color = Color(0xFFE53935))
                 }
                 state.items.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                     Text("回收站为空", color = SaltTheme.colors.subText)
@@ -76,7 +81,7 @@ fun TrashScreen(vm: TrashViewModel = koinViewModel()) {
                                     Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Restore), contentDescription = "恢复", tint = SaltTheme.colors.highlight)
                                 }
                                 androidx.compose.material3.IconButton(onClick = { vm.delete(item.id) }) {
-                                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.DeleteForever), contentDescription = "永久删除", tint = SaltTheme.colors.error)
+                                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.DeleteForever), contentDescription = "永久删除", tint = Color(0xFFE53935))
                                 }
                             }
                         }

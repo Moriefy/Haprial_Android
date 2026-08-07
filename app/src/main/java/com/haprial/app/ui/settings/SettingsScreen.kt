@@ -5,6 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +19,7 @@ import com.moriafly.salt.ui.*
 import org.koin.compose.koinInject
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(UnstableSaltUiApi::class)
+@OptIn(UnstableSaltApi::class)
 @Composable
 fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel(), authManager: AuthStateManager = koinInject()) {
     val stats by vm.stats.collectAsState()

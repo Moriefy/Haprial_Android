@@ -40,7 +40,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 }
 val bottomScreens = listOf(Screen.Articles, Screen.Comments, Screen.Friends, Screen.Images, Screen.Trash, Screen.Settings)
 
-@OptIn(UnstableSaltUiApi::class)
+@OptIn(UnstableSaltApi::class)
 @Composable
 fun HaprialNavGraph(authManager: AuthStateManager = koinInject()) {
     val navController = rememberNavController()

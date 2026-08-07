@@ -9,11 +9,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SuggestionChip
 import com.haprial.app.data.model.Comment
 import com.moriafly.salt.ui.*
+import com.moriafly.salt.ui.dialog.YesNoDialog
 import org.koin.androidx.compose.koinViewModel
 
 fun stripHtml(html: String): String = html.replace(Regex("<[^>]*>"), "").trim()
@@ -30,7 +35,7 @@ fun buildCommentTree(comments: List<Comment>): List<CommentNode> {
     return buildChildren(0)
 }
 
-@OptIn(UnstableSaltUiApi::class)
+@OptIn(UnstableSaltApi::class)
 @Composable
 fun CommentListScreen(vm: CommentListViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
@@ -129,7 +134,7 @@ fun androidx.compose.foundation.lazy.LazyListScope.renderCommentNode(
     }
 }
 
-@OptIn(UnstableSaltUiApi::class)
+@OptIn(UnstableSaltApi::class)
 @Composable
 fun CommentItem(
     comment: Comment,
@@ -164,10 +169,10 @@ fun CommentItem(
                 Text(comment.createdAt, style = SaltTheme.textStyles.sub, color = SaltTheme.colors.subText, modifier = Modifier.weight(1f))
                 // Like
                 androidx.compose.material3.IconButton(onClick = onLike, modifier = Modifier.size(32.dp)) {
-                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Favorite), contentDescription = "点赞", modifier = Modifier.size(16.dp), tint = if (comment.liked > 0) SaltTheme.colors.error else SaltTheme.colors.subText)
+                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Favorite), contentDescription = "点赞", modifier = Modifier.size(16.dp), tint = if (comment.liked > 0) Color(0xFFE53935) else SaltTheme.colors.subText)
                 }
                 if (comment.liked > 0) {
-                    Text("${comment.liked}", style = SaltTheme.textStyles.sub, color = SaltTheme.colors.error)
+                    Text("${comment.liked}", style = SaltTheme.textStyles.sub, color = Color(0xFFE53935))
                 }
                 if (depth < 2) {
                     androidx.compose.material3.IconButton(onClick = onReply, modifier = Modifier.size(32.dp)) {
@@ -178,7 +183,7 @@ fun CommentItem(
                     Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.PushPin), contentDescription = "置顶", modifier = Modifier.size(16.dp))
                 }
                 androidx.compose.material3.IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Delete), contentDescription = "删除", modifier = Modifier.size(16.dp), tint = SaltTheme.colors.error)
+                    Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Delete), contentDescription = "删除", modifier = Modifier.size(16.dp), tint = Color(0xFFE53935))
                 }
             }
         }

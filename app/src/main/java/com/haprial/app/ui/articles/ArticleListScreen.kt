@@ -12,8 +12,18 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -22,7 +32,7 @@ import com.haprial.app.data.model.Article
 import com.moriafly.salt.ui.*
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalLayoutApi::class, UnstableSaltUiApi::class)
+@OptIn(ExperimentalLayoutApi::class, UnstableSaltApi::class)
 @Composable
 fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, vm: ArticleListViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()
@@ -115,11 +125,10 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
                     Spacer(Modifier.height(16.dp))
                 }
 
-                Button(
+                TextButton(
                     onClick = {
                         statusFilter = "all"; categoryFilter = ""; yearFilter = ""; tagFilter = ""
-                    },
-                    appearance = ButtonAppearance.Subtle
+                    }
                 ) { Text("重置筛选") }
 
                 Spacer(Modifier.height(32.dp))
@@ -163,9 +172,8 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
                         }
                     }
                 )
-                Button(
-                    onClick = { showFilterSheet = true },
-                    appearance = ButtonAppearance.Subtle
+                TextButton(
+                    onClick = { showFilterSheet = true }
                 ) {
                     Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.FilterList), contentDescription = null, modifier = Modifier.size(18.dp))
                     if (statusFilter != "all" || categoryFilter.isNotBlank() || yearFilter.isNotBlank() || tagFilter.isNotBlank()) {
@@ -200,7 +208,7 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
                 state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                     androidx.compose.material3.CircularProgressIndicator()
                 }
-                state.error != null -> Box(Modifier.fillMaxSize(), Alignment.Center) { Text(state.error!!, color = SaltTheme.colors.error) }
+                state.error != null -> Box(Modifier.fillMaxSize(), Alignment.Center) { Text(state.error!!, color = Color(0xFFE53935)) }
                 else -> {
                     LazyColumn(state = listState, modifier = Modifier.weight(1f), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(pagedArticles, key = { it.id }) { a ->
@@ -227,9 +235,9 @@ fun ArticleListScreen(onArticleClick: (Int) -> Unit, onNewArticle: () -> Unit, v
                                                     leadingIcon = { Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Publish), contentDescription = null) }
                                                 )
                                                 androidx.compose.material3.DropdownMenuItem(
-                                                    { Text("删除", color = SaltTheme.colors.error) },
+                                                    { Text("删除", color = Color(0xFFE53935)) },
                                                     { menu = false; vm.deleteArticle(a.id) },
-                                                    leadingIcon = { Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Delete), contentDescription = null, tint = SaltTheme.colors.error) }
+                                                    leadingIcon = { Icon(painter = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Delete), contentDescription = null, tint = Color(0xFFE53935)) }
                                                 )
                                             }
                                         }
