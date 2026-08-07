@@ -11,11 +11,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class EditorState(
-    val title: String = "", val content: String = "", val tags: String = "",
-    val category: String = "tech", val excerpt: String = "", val date: String = "",
-    val isSaving: Boolean = false, val isSaved: Boolean = false, val error: String? = null, val isNew: Boolean = true
+    val title: String = "",
+    val content: String = "",
+    val tags: String = "",
+    val category: String = "tech",
+    val excerpt: String = "",
+    val date: String = "",
+    val isSaving: Boolean = false,
+    val isSaved: Boolean = false,
+    val error: String? = null,
+    val isNew: Boolean = true
 )
 
 class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) : ViewModel() {
@@ -24,20 +34,37 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
     private var articleId = 0
     private var autoSaveJob: Job? = null
 
-    // For toolbar markdown insertion
+    // 工具栏 Markdown 插入请求
+    @Volatile
     var pendingInsertion: Pair<String, String>? = null
 
     fun loadArticle(id: Int) {
         articleId = id
-        if (id == 0) { _state.value = EditorState(isNew = true, date = today()); startAutoSave(); return }
+        if (id == 0) {
+            _state.value = EditorState(isNew = true, date = today())
+            startAutoSave()
+            return
+        }
         viewModelScope.launch {
             try {
-                val a = api.getArticle(id).body()?.article ?: return@launch
-                _state.value = EditorState(a.title, a.content ?: "", a.tagList().joinToString(", "), a.category, a.excerpt, a.date, isNew = false)
+                val resp = api.getArticle(id)
+                if (resp.isSuccessful) {
+                    val a = resp.body()?.article ?: return@launch
+                    _state.value = EditorState(
+                        title = a.title,
+                        content = a.content ?: "",
+                        tags = a.tagList().joinToString(", "),
+                        category = a.category,
+                        excerpt = a.excerpt,
+                        date = a.date,
+                        isNew = false
+                    )
+                }
             } catch (_: Exception) {}
             startAutoSave()
         }
     }
+
     fun updateTitle(v: String) { _state.value = _state.value.copy(title = v) }
     fun updateContent(v: String) { _state.value = _state.value.copy(content = v) }
     fun updateTags(v: String) { _state.value = _state.value.copy(tags = v) }
@@ -47,14 +74,20 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
 
     fun insertMarkdown(prefix: String, suffix: String) {
         pendingInsertion = prefix to suffix
-        // Trigger recomposition
+        // 触发 recomposition 让 AndroidView 的 update 块处理插入
         _state.value = _state.value.copy()
     }
 
     fun save(status: String = "draft") {
         val s = _state.value
-        if (s.title.isBlank()) { _state.value = s.copy(error = "请输入标题"); return }
-        if (s.content.isBlank()) { _state.value = s.copy(error = "请输入内容"); return }
+        if (s.title.isBlank()) {
+            _state.value = s.copy(error = "请输入标题")
+            return
+        }
+        if (s.content.isBlank()) {
+            _state.value = s.copy(error = "请输入内容")
+            return
+        }
         viewModelScope.launch {
             _state.value = _state.value.copy(isSaving = true, error = null)
             try {
@@ -67,7 +100,7 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
                         _state.value = _state.value.copy(isSaving = false, isSaved = true, isNew = false)
                         dao.deleteDraft(0)
                     } else {
-                        _state.value = _state.value.copy(isSaving = false, error = "保存失败: ${"服务器错误"}")
+                        _state.value = _state.value.copy(isSaving = false, error = "保存失败，请重试")
                     }
                 } else {
                     val r = api.updateArticle(articleId, body)
@@ -75,11 +108,11 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
                         _state.value = _state.value.copy(isSaving = false, isSaved = true)
                         dao.deleteDraft(articleId)
                     } else {
-                        _state.value = _state.value.copy(isSaving = false, error = "保存失败: ${"服务器错误"}")
+                        _state.value = _state.value.copy(isSaving = false, error = "保存失败，请重试")
                     }
                 }
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isSaving = false, error = "保存失败: ${e.message}")
+                _state.value = _state.value.copy(isSaving = false, error = "网络错误: ${e.message}")
             }
         }
     }
@@ -90,10 +123,19 @@ class EditorViewModel(private val api: HaprialApi, private val dao: ArticleDao) 
             while (true) {
                 delay(30_000)
                 val s = _state.value
-                dao.saveDraft(DraftEntity(articleId, s.title, s.content, s.tags, s.category, s.excerpt, s.date))
+                if (s.title.isNotBlank() || s.content.isNotBlank()) {
+                    try {
+                        dao.saveDraft(DraftEntity(articleId, s.title, s.content, s.tags, s.category, s.excerpt, s.date))
+                    } catch (_: Exception) {}
+                }
             }
         }
     }
-    private fun today(): String { val c = java.util.Calendar.getInstance(); return "${c.get(1)}-${(c.get(2)+1).toString().padStart(2,'0')}-${c.get(5).toString().padStart(2,'0')}" }
-    override fun onCleared() { autoSaveJob?.cancel(); super.onCleared() }
+
+    private fun today(): String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+    override fun onCleared() {
+        autoSaveJob?.cancel()
+        super.onCleared()
+    }
 }
