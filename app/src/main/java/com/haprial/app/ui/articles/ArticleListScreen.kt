@@ -27,11 +27,7 @@ import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Surface
 import com.moriafly.salt.ui.UnstableSaltApi
-import android.widget.Toast
-import com.moriafly.salt.ui.RoundedColumn
-import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.Surface
-import com.moriafly.salt.ui.UnstableSaltApi
+import com.moriafly.salt.ui.dialog.YesNoDialog
 import android.widget.Toast
 import org.koin.androidx.compose.koinViewModel
 

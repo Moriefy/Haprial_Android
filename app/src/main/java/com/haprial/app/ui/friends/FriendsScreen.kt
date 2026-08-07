@@ -28,10 +28,8 @@ import com.moriafly.salt.ui.RoundedColumn
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.Surface
 import com.moriafly.salt.ui.UnstableSaltApi
-import com.moriafly.salt.ui.RoundedColumn
-import com.moriafly.salt.ui.SaltTheme
-import com.moriafly.salt.ui.Surface
-import com.moriafly.salt.ui.UnstableSaltApi
+import androidx.compose.foundation.border
+import com.moriafly.salt.ui.dialog.YesNoDialog
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(UnstableSaltApi::class)
