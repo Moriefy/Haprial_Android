@@ -49,6 +49,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, authManager: AuthStateManager = koin
         modifier = Modifier
             .fillMaxSize()
             .background(SaltTheme.colors.background)
+            .windowInsetsPadding(WindowInsets.statusBars)
     ) {
         Column(
             Modifier.fillMaxSize().padding(32.dp),

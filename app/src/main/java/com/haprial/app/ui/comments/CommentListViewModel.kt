@@ -25,28 +25,30 @@ class CommentListViewModel(private val api: HaprialApi) : ViewModel() {
     private val _state = MutableStateFlow(CommentState())
     val state: StateFlow<CommentState> = _state
 
-    init { loadPages(); loadArticleTitles() }
-
-    private fun loadArticleTitles() {
+    init {
+        // 先加载文章标题映射，再加载评论页面列表，避免竞态条件
         viewModelScope.launch {
-            try {
-                val articles = api.getArticles().body()?.articles ?: emptyList()
-                val map = articles.associate { "/posts/${it.slug}/" to it.title }
-                _state.value = _state.value.copy(slugTitleMap = map)
-            } catch (_: Exception) {}
+            loadArticleTitles()
+            loadPages()
         }
     }
 
-    private fun loadPages() {
-        viewModelScope.launch {
-            try {
-                val resp = api.getComments(limit = 1)
-                if (resp.isSuccessful) {
-                    _state.value = _state.value.copy(pages = resp.body()?.pages ?: emptyList())
-                    if (_state.value.pages.isNotEmpty()) loadComments(_state.value.pages[0])
-                }
-            } catch (_: Exception) {}
-        }
+    private suspend fun loadArticleTitles() {
+        try {
+            val articles = api.getArticles().body()?.articles ?: emptyList()
+            val map = articles.associate { "/posts/${it.slug}/" to it.title }
+            _state.value = _state.value.copy(slugTitleMap = map)
+        } catch (_: Exception) {}
+    }
+
+    private suspend fun loadPages() {
+        try {
+            val resp = api.getComments(limit = 1)
+            if (resp.isSuccessful) {
+                _state.value = _state.value.copy(pages = resp.body()?.pages ?: emptyList())
+                if (_state.value.pages.isNotEmpty()) loadComments(_state.value.pages[0])
+            }
+        } catch (_: Exception) {}
     }
 
     fun loadComments(page: String) {
@@ -139,6 +141,12 @@ class CommentListViewModel(private val api: HaprialApi) : ViewModel() {
     }
 
     fun getPageTitle(page: String): String {
-        return _state.value.slugTitleMap[page] ?: page.removePrefix("/posts/").removeSuffix("/")
+        // 尝试多种格式匹配
+        val map = _state.value.slugTitleMap
+        return map[page]                              // 精确匹配 /posts/slug/
+            ?: map["/posts/$page/"]                   // 补全前缀
+            ?: map[page.removeSuffix("/")]            // 去掉尾部斜杠
+            ?: map["${page}/"]                        // 加上尾部斜杠
+            ?: page.removePrefix("/posts/").removeSuffix("/")  // 回退到 slug
     }
 }
