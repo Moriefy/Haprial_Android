@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.haprial.app.data.model.Comment
 import com.moriafly.salt.ui.*
 import com.moriafly.salt.ui.dialog.YesNoDialog
@@ -35,7 +36,7 @@ fun buildCommentTree(comments: List<Comment>): List<CommentNode> {
     return buildChildren(0)
 }
 
-@OptIn(UnstableSaltApi::class)
+@OptIn(UnstableSaltApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CommentListScreen(vm: CommentListViewModel = koinViewModel()) {
     val state by vm.state.collectAsState()

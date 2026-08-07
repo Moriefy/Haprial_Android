@@ -242,8 +242,7 @@ fun ImageManagerScreen(vm: ImageManagerViewModel = koinViewModel()) {
                             modifier = Modifier.combinedClickable(
                                 onClick = { previewImage = fullUrl },
                                 onLongClick = { deleteTarget = "${state.currentFolder}/${img.name}" }
-                            ),
-                            paddingValues = PaddingValues(0.dp)
+                            )
                         ) {
                             AsyncImage(fullUrl, img.name, Modifier.fillMaxWidth().aspectRatio(1f), contentScale = ContentScale.Crop)
                         }

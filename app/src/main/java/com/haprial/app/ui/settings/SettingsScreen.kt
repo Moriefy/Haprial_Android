@@ -7,19 +7,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.haprial.app.data.auth.AuthStateManager
 import com.haprial.app.ui.theme.currentThemeMode
 import com.moriafly.salt.ui.*
 import org.koin.compose.koinInject
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(UnstableSaltApi::class)
+@OptIn(UnstableSaltApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel(), authManager: AuthStateManager = koinInject()) {
     val stats by vm.stats.collectAsState()
@@ -114,6 +116,7 @@ fun SettingsScreen(onLogout: () -> Unit, vm: SettingsViewModel = koinViewModel()
 }
 
 // Use Material3 LazyColumn since SaltUI doesn't have one
+@Composable
 @Composable
 private fun LazyColumn(content: @Composable androidx.compose.foundation.lazy.LazyListScope.() -> Unit) {
     androidx.compose.foundation.lazy.LazyColumn(

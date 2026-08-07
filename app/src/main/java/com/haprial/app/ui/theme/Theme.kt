@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.moriafly.salt.ui.SaltConfigs
 import com.moriafly.salt.ui.SaltTheme
+import com.moriafly.salt.ui.saltConfigs
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
@@ -35,7 +36,7 @@ fun HaprialTheme(content: @Composable () -> Unit) {
     }
 
     SaltTheme(
-        configs = SaltConfigs.default(isDarkTheme = darkTheme)
+        configs = saltConfigs(isDarkTheme = darkTheme)
     ) {
         content()
     }
