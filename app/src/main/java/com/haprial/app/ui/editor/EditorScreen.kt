@@ -52,7 +52,7 @@ private val mdButtons = listOf(
     MdBtn(Icons.Filled.FormatQuote, "引用", "> ", ""),
     MdBtn(Icons.Filled.FormatListBulleted, "列表", "- ", ""),
     MdBtn(Icons.Filled.Code, "代码块", "\n```\n", "\n```\n"),
-    MdBtn(Icons.Filled.Remove, "分割线", "\n---\n", ""),
+    MdBtn(Icons.Filled.Clear, "分割线", "\n---\n", ""),
 )
 
 @OptIn(UnstableSaltApi::class)
